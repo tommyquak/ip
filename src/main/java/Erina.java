@@ -5,10 +5,10 @@ import java.util.Scanner;
 /**
  * Entry point of the Erina chatbot.
  *
- * <p>At this stage (Level-5) Erina stores to-dos, deadlines and events, lists
- * them with their completion status, marks them done or not done, explains
- * what went wrong when a command cannot be carried out, and stops on the
- * {@value #EXIT_COMMAND} command.
+ * <p>At this stage (Level-6) Erina stores to-dos, deadlines and events, lists
+ * them with their completion status, marks them done or not done, deletes
+ * them, explains what went wrong when a command cannot be carried out, and
+ * stops on the {@value #EXIT_COMMAND} command.
  */
 public class Erina {
     /** Horizontal rule used to visually separate each of Erina's replies. */
@@ -35,6 +35,9 @@ public class Erina {
 
     /** Command that adds a task spanning a period of time. */
     private static final String EVENT_COMMAND = "event";
+
+    /** Command that removes a task from the list. */
+    private static final String DELETE_COMMAND = "delete";
 
     public static void main(String[] args) {
         String banner = " _____      _             \n"
@@ -113,6 +116,9 @@ public class Erina {
             break;
         case EVENT_COMMAND:
             addTask(tasks, parseEvent(argument));
+            break;
+        case DELETE_COMMAND:
+            deleteTask(tasks, argument);
             break;
         default:
             throw new ErinaException(
@@ -198,6 +204,23 @@ public class Erina {
                     + "time and a /to time, like: event project meeting /from Mon 2pm /to 4pm");
         }
         return new Event(fromParts[0].trim(), toParts[0].trim(), toParts[1].trim());
+    }
+
+    /**
+     * Removes the task at the given position and confirms it to the user.
+     *
+     * @param tasks    the list to remove from
+     * @param argument the task number as typed by the user, counting from 1
+     * @throws ErinaException if the number is missing, not a number, or does
+     *                        not refer to an existing task
+     */
+    private static void deleteTask(List<Task> tasks, String argument) throws ErinaException {
+        // Remove returns the task it took out, so it can be shown to the user
+        // after it is no longer in the list.
+        Task removed = tasks.remove(parseIndex(tasks, argument));
+        reply("Noted. I've removed this task:",
+                "  " + removed,
+                "Now you have " + tasks.size() + " tasks in the list.");
     }
 
     /**
