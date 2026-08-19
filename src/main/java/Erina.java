@@ -5,8 +5,8 @@ import java.util.Scanner;
 /**
  * Entry point of the Erina chatbot.
  *
- * <p>At this stage (Level-2) Erina stores whatever the user types as a task,
- * lists the stored tasks on request, and stops on the
+ * <p>At this stage (Level-3) Erina stores tasks, lists them with their
+ * completion status, marks them done or not done, and stops on the
  * {@value #EXIT_COMMAND} command.
  */
 public class Erina {
@@ -20,6 +20,12 @@ public class Erina {
     /** Command that shows every task added so far. */
     private static final String LIST_COMMAND = "list";
 
+    /** Command that marks a task as completed. */
+    private static final String MARK_COMMAND = "mark";
+
+    /** Command that marks a task as not yet completed. */
+    private static final String UNMARK_COMMAND = "unmark";
+
     public static void main(String[] args) {
         String banner = " _____      _             \n"
                 + "| ____|_ __(_)_ __   __ _ \n"
@@ -31,16 +37,28 @@ public class Erina {
         greet();
 
         // Tasks are held in memory only; they are not saved between runs yet.
-        List<String> tasks = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
 
         // Read one command per line until the user asks to exit.
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine();
-            if (input.equals(EXIT_COMMAND)) {
+
+            // Split into the command word and everything after it, so that
+            // commands taking an argument (mark 2) can be told apart from
+            // commands that do not (list).
+            String[] parts = input.split(" ", 2);
+            String command = parts[0];
+            String argument = parts.length > 1 ? parts[1] : "";
+
+            if (command.equals(EXIT_COMMAND)) {
                 break;
-            } else if (input.equals(LIST_COMMAND)) {
+            } else if (command.equals(LIST_COMMAND)) {
                 listTasks(tasks);
+            } else if (command.equals(MARK_COMMAND)) {
+                setDone(tasks, argument, true);
+            } else if (command.equals(UNMARK_COMMAND)) {
+                setDone(tasks, argument, false);
             } else {
                 addTask(tasks, input);
             }
@@ -52,12 +70,33 @@ public class Erina {
     /**
      * Adds a task to the list and confirms it to the user.
      *
-     * @param tasks the list to add to
-     * @param task  the task description as typed by the user
+     * @param tasks       the list to add to
+     * @param description the task description as typed by the user
      */
-    private static void addTask(List<String> tasks, String task) {
-        tasks.add(task);
-        reply("added: " + task);
+    private static void addTask(List<Task> tasks, String description) {
+        tasks.add(new Task(description));
+        reply("added: " + description);
+    }
+
+    /**
+     * Marks the task at the given position as done or not done.
+     *
+     * @param tasks    the list holding the task
+     * @param argument the task number as typed by the user, counting from 1
+     * @param isDone   {@code true} to mark done, {@code false} to mark not done
+     */
+    private static void setDone(List<Task> tasks, String argument, boolean isDone) {
+        // The user counts from 1 but the list is indexed from 0.
+        int index = Integer.parseInt(argument.trim()) - 1;
+        Task task = tasks.get(index);
+
+        if (isDone) {
+            task.markAsDone();
+            reply("Nice! I've marked this task as done:", "  " + task);
+        } else {
+            task.markAsNotDone();
+            reply("OK, I've marked this task as not done yet:", "  " + task);
+        }
     }
 
     /**
@@ -67,16 +106,18 @@ public class Erina {
      *
      * @param tasks the tasks to show
      */
-    private static void listTasks(List<String> tasks) {
+    private static void listTasks(List<Task> tasks) {
         if (tasks.isEmpty()) {
             reply("Your list is empty. Add something to get started!");
             return;
         }
 
-        String[] lines = new String[tasks.size()];
+        // One heading line, then one line per task.
+        String[] lines = new String[tasks.size() + 1];
+        lines[0] = "Here are the tasks in your list:";
         for (int i = 0; i < tasks.size(); i++) {
             // Users count from 1, so display position i as i + 1.
-            lines[i] = (i + 1) + ". " + tasks.get(i);
+            lines[i + 1] = (i + 1) + "." + tasks.get(i);
         }
         reply(lines);
     }
