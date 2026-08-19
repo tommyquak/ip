@@ -5,9 +5,10 @@ import java.util.Scanner;
 /**
  * Entry point of the Erina chatbot.
  *
- * <p>At this stage (Level-4) Erina stores to-dos, deadlines and events,
- * lists them with their completion status, marks them done or not done,
- * and stops on the {@value #EXIT_COMMAND} command.
+ * <p>At this stage (Level-5) Erina stores to-dos, deadlines and events, lists
+ * them with their completion status, marks them done or not done, explains
+ * what went wrong when a command cannot be carried out, and stops on the
+ * {@value #EXIT_COMMAND} command.
  */
 public class Erina {
     /** Horizontal rule used to visually separate each of Erina's replies. */
@@ -51,35 +52,72 @@ public class Erina {
         // Read one command per line until the user asks to exit.
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
-            String input = scanner.nextLine();
+            String input = scanner.nextLine().trim();
+
+            // A blank line is not worth an error message; just read the next one.
+            if (input.isEmpty()) {
+                continue;
+            }
 
             // Split into the command word and everything after it, so that
             // commands taking an argument (mark 2) can be told apart from
             // commands that do not (list).
             String[] parts = input.split(" ", 2);
             String command = parts[0];
-            String argument = parts.length > 1 ? parts[1] : "";
+            String argument = parts.length > 1 ? parts[1].trim() : "";
 
             if (command.equals(EXIT_COMMAND)) {
                 break;
-            } else if (command.equals(LIST_COMMAND)) {
-                listTasks(tasks);
-            } else if (command.equals(MARK_COMMAND)) {
-                setDone(tasks, argument, true);
-            } else if (command.equals(UNMARK_COMMAND)) {
-                setDone(tasks, argument, false);
-            } else if (command.equals(TODO_COMMAND)) {
-                addTask(tasks, new Todo(argument));
-            } else if (command.equals(DEADLINE_COMMAND)) {
-                addTask(tasks, parseDeadline(argument));
-            } else if (command.equals(EVENT_COMMAND)) {
-                addTask(tasks, parseEvent(argument));
-            } else {
-                reply("Sorry, I don't recognise the command \"" + command + "\".");
+            }
+
+            // Every command below may reject what the user typed. Catching
+            // here, at the top of the loop, means one place decides what a
+            // failed command looks like, and a bad command never ends the
+            // conversation.
+            try {
+                handleCommand(tasks, command, argument);
+            } catch (ErinaException e) {
+                reply(e.getMessage());
             }
         }
 
         exit();
+    }
+
+    /**
+     * Carries out one command from the user.
+     *
+     * @param tasks    the list the command acts on
+     * @param command  the first word the user typed
+     * @param argument everything after the command word, possibly empty
+     * @throws ErinaException if the command is unknown, or its argument is
+     *                        missing or does not make sense
+     */
+    private static void handleCommand(List<Task> tasks, String command, String argument)
+            throws ErinaException {
+        switch (command) {
+        case LIST_COMMAND:
+            listTasks(tasks);
+            break;
+        case MARK_COMMAND:
+            setDone(tasks, argument, true);
+            break;
+        case UNMARK_COMMAND:
+            setDone(tasks, argument, false);
+            break;
+        case TODO_COMMAND:
+            addTask(tasks, parseTodo(argument));
+            break;
+        case DEADLINE_COMMAND:
+            addTask(tasks, parseDeadline(argument));
+            break;
+        case EVENT_COMMAND:
+            addTask(tasks, parseEvent(argument));
+            break;
+        default:
+            throw new ErinaException(
+                    "OOPS!!! I'm sorry, but I don't know what that means :-(");
+        }
     }
 
     /**
@@ -96,29 +134,69 @@ public class Erina {
     }
 
     /**
+     * Builds a to-do from the text after the {@value #TODO_COMMAND} command.
+     *
+     * @param argument the text after the command word
+     * @return the to-do described by that text
+     * @throws ErinaException if no description was given
+     */
+    private static Todo parseTodo(String argument) throws ErinaException {
+        if (argument.isEmpty()) {
+            throw new ErinaException(
+                    "OOPS!!! The description of a todo cannot be empty.");
+        }
+        return new Todo(argument);
+    }
+
+    /**
      * Builds a deadline from the text after the {@value #DEADLINE_COMMAND}
      * command, which has the form {@code <description> /by <when>}.
      *
      * @param argument the text after the command word
      * @return the deadline described by that text
+     * @throws ErinaException if the description or the /by part is missing
      */
-    private static Deadline parseDeadline(String argument) {
+    private static Deadline parseDeadline(String argument) throws ErinaException {
+        if (argument.isEmpty()) {
+            throw new ErinaException(
+                    "OOPS!!! The description of a deadline cannot be empty.");
+        }
+
         // Limit of 2 so that a description containing "/by" is left intact.
         String[] parts = argument.split(" /by ", 2);
+        if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
+            throw new ErinaException("OOPS!!! A deadline needs a description and a "
+                    + "/by time, like: deadline return book /by Sunday");
+        }
         return new Deadline(parts[0].trim(), parts[1].trim());
     }
 
     /**
-     * Builds an event from the text after the {@value #EVENT_COMMAND}
-     * command, which has the form
-     * {@code <description> /from <start> /to <end>}.
+     * Builds an event from the text after the {@value #EVENT_COMMAND} command,
+     * which has the form {@code <description> /from <start> /to <end>}.
      *
      * @param argument the text after the command word
      * @return the event described by that text
+     * @throws ErinaException if the description, the /from part or the /to
+     *                        part is missing
      */
-    private static Event parseEvent(String argument) {
+    private static Event parseEvent(String argument) throws ErinaException {
+        if (argument.isEmpty()) {
+            throw new ErinaException(
+                    "OOPS!!! The description of an event cannot be empty.");
+        }
+
         String[] fromParts = argument.split(" /from ", 2);
+        if (fromParts.length < 2 || fromParts[0].isBlank()) {
+            throw new ErinaException("OOPS!!! An event needs a description, a /from "
+                    + "time and a /to time, like: event project meeting /from Mon 2pm /to 4pm");
+        }
+
         String[] toParts = fromParts[1].split(" /to ", 2);
+        if (toParts.length < 2 || toParts[0].isBlank() || toParts[1].isBlank()) {
+            throw new ErinaException("OOPS!!! An event needs a description, a /from "
+                    + "time and a /to time, like: event project meeting /from Mon 2pm /to 4pm");
+        }
         return new Event(fromParts[0].trim(), toParts[0].trim(), toParts[1].trim());
     }
 
@@ -128,11 +206,12 @@ public class Erina {
      * @param tasks    the list holding the task
      * @param argument the task number as typed by the user, counting from 1
      * @param isDone   {@code true} to mark done, {@code false} to mark not done
+     * @throws ErinaException if the number is missing, not a number, or does
+     *                        not refer to an existing task
      */
-    private static void setDone(List<Task> tasks, String argument, boolean isDone) {
-        // The user counts from 1 but the list is indexed from 0.
-        int index = Integer.parseInt(argument.trim()) - 1;
-        Task task = tasks.get(index);
+    private static void setDone(List<Task> tasks, String argument, boolean isDone)
+            throws ErinaException {
+        Task task = tasks.get(parseIndex(tasks, argument));
 
         if (isDone) {
             task.markAsDone();
@@ -141,6 +220,47 @@ public class Erina {
             task.markAsNotDone();
             reply("OK, I've marked this task as not done yet:", "  " + task);
         }
+    }
+
+    /**
+     * Turns the task number the user typed into a position in the list.
+     *
+     * <p>Every command taking a task number validates it here, so the checks
+     * and their wording stay in one place.
+     *
+     * @param tasks    the list the number refers to
+     * @param argument the task number as typed by the user, counting from 1
+     * @return the matching 0-based index into {@code tasks}
+     * @throws ErinaException if the number is missing, not a number, or does
+     *                        not refer to an existing task
+     */
+    private static int parseIndex(List<Task> tasks, String argument) throws ErinaException {
+        if (argument.isEmpty()) {
+            throw new ErinaException("OOPS!!! Please tell me which task number, "
+                    + "like: mark 2");
+        }
+
+        int number;
+        try {
+            number = Integer.parseInt(argument);
+        } catch (NumberFormatException e) {
+            // Rethrown as an ErinaException so the main loop deals with one
+            // kind of failure, phrased for the user rather than the compiler.
+            throw new ErinaException("OOPS!!! \"" + argument
+                    + "\" is not a task number.");
+        }
+
+        if (tasks.isEmpty()) {
+            throw new ErinaException("OOPS!!! There are no tasks yet, so there is "
+                    + "no task " + number + ".");
+        }
+        if (number < 1 || number > tasks.size()) {
+            throw new ErinaException("OOPS!!! There is no task " + number
+                    + ". You have " + tasks.size() + " tasks.");
+        }
+
+        // The user counts from 1 but the list is indexed from 0.
+        return number - 1;
     }
 
     /**
