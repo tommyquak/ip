@@ -4,8 +4,13 @@
  * <p>A task is a description together with whether it has been completed.
  * Keeping both in one object, rather than parallel lists of strings and
  * booleans, means the two can never fall out of step.
+ *
+ * <p>This class is abstract because every task the user can create is one of
+ * the specific kinds below it ({@link Todo}, {@link Deadline}, {@link Event}).
+ * Each kind decides how it is shown by overriding {@link #toString()}, while
+ * the description and completion flag are handled once, here.
  */
-public class Task {
+public abstract class Task {
     /** What the user wants to do. Fixed once the task is created. */
     private final String description;
 
@@ -42,7 +47,10 @@ public class Task {
     }
 
     /**
-     * Returns this task as the user should see it, for example {@code [X] read book}.
+     * Returns the status box and description shared by every kind of task,
+     * for example {@code [X] read book}.
+     *
+     * <p>Subclasses prepend their own type box and append any extra detail.
      */
     @Override
     public String toString() {

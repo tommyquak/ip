@@ -5,9 +5,9 @@ import java.util.Scanner;
 /**
  * Entry point of the Erina chatbot.
  *
- * <p>At this stage (Level-3) Erina stores tasks, lists them with their
- * completion status, marks them done or not done, and stops on the
- * {@value #EXIT_COMMAND} command.
+ * <p>At this stage (Level-4) Erina stores to-dos, deadlines and events,
+ * lists them with their completion status, marks them done or not done,
+ * and stops on the {@value #EXIT_COMMAND} command.
  */
 public class Erina {
     /** Horizontal rule used to visually separate each of Erina's replies. */
@@ -25,6 +25,15 @@ public class Erina {
 
     /** Command that marks a task as not yet completed. */
     private static final String UNMARK_COMMAND = "unmark";
+
+    /** Command that adds a task with only a description. */
+    private static final String TODO_COMMAND = "todo";
+
+    /** Command that adds a task due by a stated time. */
+    private static final String DEADLINE_COMMAND = "deadline";
+
+    /** Command that adds a task spanning a period of time. */
+    private static final String EVENT_COMMAND = "event";
 
     public static void main(String[] args) {
         String banner = " _____      _             \n"
@@ -59,8 +68,14 @@ public class Erina {
                 setDone(tasks, argument, true);
             } else if (command.equals(UNMARK_COMMAND)) {
                 setDone(tasks, argument, false);
+            } else if (command.equals(TODO_COMMAND)) {
+                addTask(tasks, new Todo(argument));
+            } else if (command.equals(DEADLINE_COMMAND)) {
+                addTask(tasks, parseDeadline(argument));
+            } else if (command.equals(EVENT_COMMAND)) {
+                addTask(tasks, parseEvent(argument));
             } else {
-                addTask(tasks, input);
+                reply("Sorry, I don't recognise the command \"" + command + "\".");
             }
         }
 
@@ -68,14 +83,43 @@ public class Erina {
     }
 
     /**
-     * Adds a task to the list and confirms it to the user.
+     * Adds an already-built task to the list and confirms it to the user.
      *
-     * @param tasks       the list to add to
-     * @param description the task description as typed by the user
+     * @param tasks the list to add to
+     * @param task  the task to add
      */
-    private static void addTask(List<Task> tasks, String description) {
-        tasks.add(new Task(description));
-        reply("added: " + description);
+    private static void addTask(List<Task> tasks, Task task) {
+        tasks.add(task);
+        reply("Got it. I've added this task:",
+                "  " + task,
+                "Now you have " + tasks.size() + " tasks in the list.");
+    }
+
+    /**
+     * Builds a deadline from the text after the {@value #DEADLINE_COMMAND}
+     * command, which has the form {@code <description> /by <when>}.
+     *
+     * @param argument the text after the command word
+     * @return the deadline described by that text
+     */
+    private static Deadline parseDeadline(String argument) {
+        // Limit of 2 so that a description containing "/by" is left intact.
+        String[] parts = argument.split(" /by ", 2);
+        return new Deadline(parts[0].trim(), parts[1].trim());
+    }
+
+    /**
+     * Builds an event from the text after the {@value #EVENT_COMMAND}
+     * command, which has the form
+     * {@code <description> /from <start> /to <end>}.
+     *
+     * @param argument the text after the command word
+     * @return the event described by that text
+     */
+    private static Event parseEvent(String argument) {
+        String[] fromParts = argument.split(" /from ", 2);
+        String[] toParts = fromParts[1].split(" /to ", 2);
+        return new Event(fromParts[0].trim(), toParts[0].trim(), toParts[1].trim());
     }
 
     /**
