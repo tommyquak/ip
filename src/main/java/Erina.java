@@ -5,39 +5,17 @@ import java.util.Scanner;
 /**
  * Entry point of the Erina chatbot.
  *
- * <p>At this stage (Level-6) Erina stores to-dos, deadlines and events, lists
- * them with their completion status, marks them done or not done, deletes
- * them, explains what went wrong when a command cannot be carried out, and
- * stops on the {@value #EXIT_COMMAND} command.
+ * <p>Erina stores to-dos, deadlines and events, lists them with their
+ * completion status, marks them done or not done, deletes them, explains
+ * what went wrong when a command cannot be carried out, and stops on the
+ * {@code bye} command.
+ *
+ * <p>The instructions Erina accepts are listed in {@link Command}.
  */
 public class Erina {
     /** Horizontal rule used to visually separate each of Erina's replies. */
     private static final String DIVIDER =
             "    ____________________________________________________________";
-
-    /** Command that ends the conversation. */
-    private static final String EXIT_COMMAND = "bye";
-
-    /** Command that shows every task added so far. */
-    private static final String LIST_COMMAND = "list";
-
-    /** Command that marks a task as completed. */
-    private static final String MARK_COMMAND = "mark";
-
-    /** Command that marks a task as not yet completed. */
-    private static final String UNMARK_COMMAND = "unmark";
-
-    /** Command that adds a task with only a description. */
-    private static final String TODO_COMMAND = "todo";
-
-    /** Command that adds a task due by a stated time. */
-    private static final String DEADLINE_COMMAND = "deadline";
-
-    /** Command that adds a task spanning a period of time. */
-    private static final String EVENT_COMMAND = "event";
-
-    /** Command that removes a task from the list. */
-    private static final String DELETE_COMMAND = "delete";
 
     public static void main(String[] args) {
         String banner = " _____      _             \n"
@@ -66,18 +44,18 @@ public class Erina {
             // commands taking an argument (mark 2) can be told apart from
             // commands that do not (list).
             String[] parts = input.split(" ", 2);
-            String command = parts[0];
+            String keyword = parts[0];
             String argument = parts.length > 1 ? parts[1].trim() : "";
 
-            if (command.equals(EXIT_COMMAND)) {
-                break;
-            }
-
-            // Every command below may reject what the user typed. Catching
-            // here, at the top of the loop, means one place decides what a
-            // failed command looks like, and a bad command never ends the
-            // conversation.
+            // Looking the command up and carrying it out may both reject what
+            // the user typed. Catching here, at the top of the loop, means one
+            // place decides what a failed command looks like, and a bad
+            // command never ends the conversation.
             try {
+                Command command = Command.fromKeyword(keyword);
+                if (command == Command.BYE) {
+                    break;
+                }
                 handleCommand(tasks, command, argument);
             } catch (ErinaException e) {
                 reply(e.getMessage());
@@ -91,36 +69,37 @@ public class Erina {
      * Carries out one command from the user.
      *
      * @param tasks    the list the command acts on
-     * @param command  the first word the user typed
+     * @param command  the command the user asked for
      * @param argument everything after the command word, possibly empty
-     * @throws ErinaException if the command is unknown, or its argument is
-     *                        missing or does not make sense
+     * @throws ErinaException if the argument is missing or does not make sense
      */
-    private static void handleCommand(List<Task> tasks, String command, String argument)
+    private static void handleCommand(List<Task> tasks, Command command, String argument)
             throws ErinaException {
         switch (command) {
-        case LIST_COMMAND:
+        case LIST:
             listTasks(tasks);
             break;
-        case MARK_COMMAND:
+        case MARK:
             setDone(tasks, argument, true);
             break;
-        case UNMARK_COMMAND:
+        case UNMARK:
             setDone(tasks, argument, false);
             break;
-        case TODO_COMMAND:
+        case TODO:
             addTask(tasks, parseTodo(argument));
             break;
-        case DEADLINE_COMMAND:
+        case DEADLINE:
             addTask(tasks, parseDeadline(argument));
             break;
-        case EVENT_COMMAND:
+        case EVENT:
             addTask(tasks, parseEvent(argument));
             break;
-        case DELETE_COMMAND:
+        case DELETE:
             deleteTask(tasks, argument);
             break;
         default:
+            // BYE is handled by the main loop, which has to stop reading.
+            // Unknown words never reach here: Command.fromKeyword rejects them.
             throw new ErinaException(
                     "OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
@@ -140,7 +119,7 @@ public class Erina {
     }
 
     /**
-     * Builds a to-do from the text after the {@value #TODO_COMMAND} command.
+     * Builds a to-do from the text after the {@code todo} command.
      *
      * @param argument the text after the command word
      * @return the to-do described by that text
@@ -155,7 +134,7 @@ public class Erina {
     }
 
     /**
-     * Builds a deadline from the text after the {@value #DEADLINE_COMMAND}
+     * Builds a deadline from the text after the {@code deadline}
      * command, which has the form {@code <description> /by <when>}.
      *
      * @param argument the text after the command word
@@ -178,7 +157,7 @@ public class Erina {
     }
 
     /**
-     * Builds an event from the text after the {@value #EVENT_COMMAND} command,
+     * Builds an event from the text after the {@code event} command,
      * which has the form {@code <description> /from <start> /to <end>}.
      *
      * @param argument the text after the command word
