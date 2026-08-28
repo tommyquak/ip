@@ -1,3 +1,5 @@
+package erina;
+
 /**
  * Signals that Erina understood the user well enough to know something was
  * wrong with the request, and can explain it.

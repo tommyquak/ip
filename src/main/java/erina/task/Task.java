@@ -1,3 +1,5 @@
+package erina.task;
+
 /**
  * A single item on the user's list.
  *

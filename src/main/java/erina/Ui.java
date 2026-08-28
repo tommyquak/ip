@@ -1,3 +1,5 @@
+package erina;
+
 import java.util.Scanner;
 
 /**

@@ -1,3 +1,5 @@
+package erina;
+
 /**
  * The set of instructions Erina understands.
  *
