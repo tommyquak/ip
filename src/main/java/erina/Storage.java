@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Reads and writes the task list on the hard disk, so tasks survive between
@@ -117,7 +118,7 @@ public class Storage {
     private Task parseTask(String line) throws ErinaException {
         // The separator contains |, which is a special character in regular
         // expressions, so split on its literal quoted form.
-        String[] fields = line.split(java.util.regex.Pattern.quote(FIELD_SEPARATOR));
+        String[] fields = line.split(Pattern.quote(FIELD_SEPARATOR));
 
         Task task;
         switch (fields[0]) {
