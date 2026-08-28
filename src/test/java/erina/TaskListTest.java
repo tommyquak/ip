@@ -3,6 +3,8 @@ package erina;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import erina.task.Task;
@@ -28,6 +30,29 @@ public class TaskListTest {
         assertEquals(2, tasks.size());
         assertEquals("first", tasks.get(0).getDescription());
         assertEquals("second", tasks.get(1).getDescription());
+    }
+
+    @Test
+    public void find_keywordInSomeTasks_returnsOnlyThoseInOrder() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("buy milk"));
+        tasks.add(new Todo("return Book"));
+
+        List<Task> matches = tasks.find("book");
+
+        // Matching ignores case, and keeps list order.
+        assertEquals(2, matches.size());
+        assertEquals("read book", matches.get(0).getDescription());
+        assertEquals("return Book", matches.get(1).getDescription());
+    }
+
+    @Test
+    public void find_keywordInNoTasks_returnsEmptyList() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+
+        assertTrue(tasks.find("laundry").isEmpty());
     }
 
     @Test

@@ -78,6 +78,26 @@ public class TaskList {
     }
 
     /**
+     * Returns the tasks whose descriptions contain the given keyword.
+     *
+     * <p>Matching ignores case, so {@code find book} also finds
+     * {@code Book club}: when searching, the user is after the task, not the
+     * capitalisation they happened to type it with.
+     *
+     * @param keyword the text to look for inside task descriptions
+     * @return the matching tasks, in the order they appear in the list
+     */
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
      * Returns the tasks as a plain list, for code that needs to iterate or
      * save them.
      *
