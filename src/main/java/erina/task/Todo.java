@@ -1,3 +1,5 @@
+package erina.task;
+
 /**
  * A task with nothing but a description, shown as {@code [T][ ] borrow book}.
  */

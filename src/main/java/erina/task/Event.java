@@ -1,3 +1,5 @@
+package erina.task;
+
 /**
  * A task that spans a period of time, shown as
  * {@code [E][ ] project meeting (from: Mon 2pm to: 4pm)}.

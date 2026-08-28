@@ -1,3 +1,6 @@
+package erina;
+
+import erina.task.Task;
 import java.nio.file.Path;
 
 /**
