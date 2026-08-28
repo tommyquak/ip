@@ -39,12 +39,20 @@ public abstract class Task {
         this.isDone = false;
     }
 
-    /** Returns whether the user has marked this task as completed. */
+    /**
+     * Returns whether the user has marked this task as completed.
+     *
+     * @return {@code true} if this task is done
+     */
     public boolean isDone() {
         return isDone;
     }
 
-    /** Returns what the user wants to do. */
+    /**
+     * Returns what the user wants to do.
+     *
+     * @return the description, as the user typed it
+     */
     public String getDescription() {
         return description;
     }
@@ -57,6 +65,8 @@ public abstract class Task {
      * own save form, the same way each decides its own {@link #toString()}.
      * The save form is machine-facing and stable; toString is user-facing
      * and free to change, which is why they are separate methods.
+     *
+     * @return this task as one line of the save file
      */
     public abstract String toSaveString();
 

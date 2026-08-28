@@ -41,6 +41,11 @@ public class Erina {
         this.ui = new Ui();
     }
 
+    /**
+     * Starts Erina with the standard save file location.
+     *
+     * @param args not used
+     */
     public static void main(String[] args) {
         new Erina(SAVE_FILE).run();
     }
