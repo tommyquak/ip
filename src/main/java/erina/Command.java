@@ -30,6 +30,9 @@ public enum Command {
     /** Removes a task from the list. */
     DELETE("delete"),
 
+    /** Shows the tasks whose descriptions contain a keyword. */
+    FIND("find"),
+
     /** Ends the conversation. */
     BYE("bye");
 

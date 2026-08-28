@@ -1,7 +1,9 @@
 package erina;
 
 import erina.task.Task;
+
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Entry point of the Erina chatbot.
@@ -137,6 +139,9 @@ public class Erina {
         case DELETE:
             deleteTask(argument);
             break;
+        case FIND:
+            findTasks(argument);
+            break;
         default:
             // BYE is handled by the main loop, which has to stop reading.
             // Unknown words never reach here: Command.fromKeyword rejects them.
@@ -191,6 +196,36 @@ public class Erina {
             task.markAsNotDone();
             ui.reply("OK, I've marked this task as not done yet:", "  " + task);
         }
+    }
+
+    /**
+     * Shows the tasks whose descriptions contain the given keyword.
+     *
+     * <p>Matches are numbered from 1 by their position among the matches,
+     * not their position in the full list, mirroring how the course sample
+     * output presents them.
+     *
+     * @param argument the text to search for
+     * @throws ErinaException if no text to search for was given
+     */
+    private void findTasks(String argument) throws ErinaException {
+        if (argument.isEmpty()) {
+            throw new ErinaException("OOPS!!! Please tell me what to look for, "
+                    + "like: find book");
+        }
+
+        List<Task> matches = tasks.find(argument);
+        if (matches.isEmpty()) {
+            ui.reply("No tasks match \"" + argument + "\".");
+            return;
+        }
+
+        String[] lines = new String[matches.size() + 1];
+        lines[0] = "Here are the matching tasks in your list:";
+        for (int i = 0; i < matches.size(); i++) {
+            lines[i + 1] = (i + 1) + "." + matches.get(i);
+        }
+        ui.reply(lines);
     }
 
     /**
