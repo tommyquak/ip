@@ -1,3 +1,4 @@
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -8,11 +9,16 @@ import java.util.Scanner;
  * <p>Erina stores to-dos, deadlines and events, lists them with their
  * completion status, marks them done or not done, deletes them, explains
  * what went wrong when a command cannot be carried out, and stops on the
- * {@code bye} command.
+ * {@code bye} command. The task list is saved to the hard disk after
+ * every change and loaded back on the next start, so tasks survive
+ * between runs.
  *
  * <p>The instructions Erina accepts are listed in {@link Command}.
  */
 public class Erina {
+    /** Where the task list is kept between runs. */
+    private static final Path SAVE_FILE = Path.of("data", "erina.txt");
+
     /** Horizontal rule used to visually separate each of Erina's replies. */
     private static final String DIVIDER =
             "    ____________________________________________________________";
@@ -27,8 +33,18 @@ public class Erina {
 
         greet();
 
-        // Tasks are held in memory only; they are not saved between runs yet.
-        List<Task> tasks = new ArrayList<>();
+        Storage storage = new Storage(SAVE_FILE);
+
+        // A save file that cannot be understood should not end the program:
+        // report it and carry on with an empty list. The unreadable file is
+        // only replaced once the user changes something.
+        List<Task> tasks;
+        try {
+            tasks = storage.load();
+        } catch (ErinaException e) {
+            reply(e.getMessage(), "I'll start with an empty list instead.");
+            tasks = new ArrayList<>();
+        }
 
         // Read one command per line until the user asks to exit.
         Scanner scanner = new Scanner(System.in);
@@ -57,6 +73,11 @@ public class Erina {
                     break;
                 }
                 handleCommand(tasks, command, argument);
+
+                // Saving after every successful command, in one place, keeps
+                // the file in step with the list without each command having
+                // to remember to save.
+                storage.save(tasks);
             } catch (ErinaException e) {
                 reply(e.getMessage());
             }

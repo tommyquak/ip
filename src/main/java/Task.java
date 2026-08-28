@@ -37,6 +37,27 @@ public abstract class Task {
         this.isDone = false;
     }
 
+    /** Returns whether the user has marked this task as completed. */
+    public boolean isDone() {
+        return isDone;
+    }
+
+    /** Returns what the user wants to do. */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * Returns this task in the form it is written to the save file, for
+     * example {@code T | 1 | read book}.
+     *
+     * <p>Each kind of task knows its own fields, so each kind decides its
+     * own save form, the same way each decides its own {@link #toString()}.
+     * The save form is machine-facing and stable; toString is user-facing
+     * and free to change, which is why they are separate methods.
+     */
+    public abstract String toSaveString();
+
     /**
      * Returns the symbol shown inside the status box.
      *
