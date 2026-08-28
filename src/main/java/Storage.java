@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.List;
  * {@link Task#toSaveString()}, for example:
  * <pre>
  * T | 1 | read book
- * D | 0 | return book | Sunday
+ * D | 0 | return book | 2019-10-15
  * E | 0 | project meeting | Mon 2pm | 4pm
  * </pre>
  */
@@ -63,7 +65,8 @@ public class Storage {
             }
             try {
                 tasks.add(parseTask(line));
-            } catch (ErinaException | ArrayIndexOutOfBoundsException e) {
+            } catch (ErinaException | ArrayIndexOutOfBoundsException
+                    | DateTimeParseException e) {
                 // Report the line number as people count them, from 1.
                 throw new ErinaException("OOPS!!! Line " + (i + 1)
                         + " of the save file " + filePath + " is not a task I understand:"
@@ -116,7 +119,7 @@ public class Storage {
             task = new Todo(fields[2]);
             break;
         case "D":
-            task = new Deadline(fields[2], fields[3]);
+            task = new Deadline(fields[2], LocalDate.parse(fields[3]));
             break;
         case "E":
             task = new Event(fields[2], fields[3], fields[4]);

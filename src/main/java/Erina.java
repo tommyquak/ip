@@ -1,4 +1,6 @@
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -156,11 +158,12 @@ public class Erina {
 
     /**
      * Builds a deadline from the text after the {@code deadline}
-     * command, which has the form {@code <description> /by <when>}.
+     * command, which has the form {@code <description> /by <yyyy-mm-dd>}.
      *
      * @param argument the text after the command word
      * @return the deadline described by that text
-     * @throws ErinaException if the description or the /by part is missing
+     * @throws ErinaException if the description or the /by part is missing,
+     *                        or the /by part is not a date
      */
     private static Deadline parseDeadline(String argument) throws ErinaException {
         if (argument.isEmpty()) {
@@ -172,9 +175,25 @@ public class Erina {
         String[] parts = argument.split(" /by ", 2);
         if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
             throw new ErinaException("OOPS!!! A deadline needs a description and a "
-                    + "/by time, like: deadline return book /by Sunday");
+                    + "/by date, like: deadline return book /by 2019-10-15");
         }
-        return new Deadline(parts[0].trim(), parts[1].trim());
+        return new Deadline(parts[0].trim(), parseDate(parts[1].trim()));
+    }
+
+    /**
+     * Turns a date the user typed into a real date.
+     *
+     * @param text the date as typed, expected as {@code yyyy-mm-dd}
+     * @return the date it names
+     * @throws ErinaException if the text is not a date in that form
+     */
+    private static LocalDate parseDate(String text) throws ErinaException {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException e) {
+            throw new ErinaException("OOPS!!! \"" + text + "\" is not a date I "
+                    + "understand. Please use yyyy-mm-dd, like 2019-10-15.");
+        }
     }
 
     /**
