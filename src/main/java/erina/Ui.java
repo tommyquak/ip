@@ -16,6 +16,10 @@ public class Ui {
     private static final String DIVIDER =
             "    ____________________________________________________________";
 
+    /** Creates a Ui that reads from standard input and prints to standard output. */
+    public Ui() {
+    }
+
     /** Where user input is read from. */
     private final Scanner scanner = new Scanner(System.in);
 

@@ -59,12 +59,20 @@ public class TaskList {
         return tasks.get(index);
     }
 
-    /** Returns how many tasks the list holds. */
+    /**
+     * Returns how many tasks the list holds.
+     *
+     * @return the number of tasks
+     */
     public int size() {
         return tasks.size();
     }
 
-    /** Returns whether the list holds no tasks. */
+    /**
+     * Returns whether the list holds no tasks.
+     *
+     * @return {@code true} if there are no tasks
+     */
     public boolean isEmpty() {
         return tasks.isEmpty();
     }

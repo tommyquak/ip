@@ -61,7 +61,11 @@ public enum Command {
                 "OOPS!!! I'm sorry, but I don't know what that means :-(");
     }
 
-    /** Returns the word the user types to invoke this command. */
+    /**
+     * Returns the word the user types to invoke this command.
+     *
+     * @return the keyword, for example {@code "mark"}
+     */
     public String getKeyword() {
         return keyword;
     }
