@@ -163,6 +163,20 @@ public class Erina {
     }
 
     /**
+     * Joins the lines of a reply into the single string the callers expect.
+     *
+     * <p>Declared with varargs so a reply reads as its lines, one per
+     * argument, in the same shape as {@link Ui#reply(String...)}. Callers
+     * holding an array of lines can pass it directly.
+     *
+     * @param lines the lines of the reply, in order
+     * @return the lines separated by newlines
+     */
+    private static String respond(String... lines) {
+        return String.join("\n", lines);
+    }
+
+    /**
      * Carries out one command from the user.
      *
      * @param command  the command the user asked for
@@ -204,7 +218,7 @@ public class Erina {
      */
     private String addTask(Task task) {
         tasks.add(task);
-        return String.join("\n",
+        return respond(
                 "Got it. I've added this task:",
                 "  " + task,
                 "Now you have " + tasks.size() + " tasks in the list.");
@@ -222,7 +236,7 @@ public class Erina {
         // Remove returns the task it took out, so it can be shown to the user
         // after it is no longer in the list.
         Task removed = tasks.remove(Parser.parseIndex(argument, tasks.size()));
-        return String.join("\n",
+        return respond(
                 "Noted. I've removed this task:",
                 "  " + removed,
                 "Now you have " + tasks.size() + " tasks in the list.");
@@ -275,7 +289,7 @@ public class Erina {
         for (int i = 0; i < matches.size(); i++) {
             lines[i + 1] = (i + 1) + "." + matches.get(i);
         }
-        return String.join("\n", lines);
+        return respond(lines);
     }
 
     /**
@@ -297,6 +311,6 @@ public class Erina {
             // Users count from 1, so display position i as i + 1.
             lines[i + 1] = (i + 1) + "." + tasks.get(i);
         }
-        return String.join("\n", lines);
+        return respond(lines);
     }
 }
