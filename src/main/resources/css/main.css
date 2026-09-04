@@ -1,0 +1,46 @@
+/* Keeps the conversation readable: the two speakers get different bubble
+   colours, and monospaced text keeps the task list columns lined up. */
+
+.root {
+    -fx-background-color: #f4f6f8;
+}
+
+.dialog-label {
+    -fx-background-color: #d7e8ff;
+    -fx-background-radius: 12;
+    -fx-padding: 10 12 10 12;
+    -fx-font-family: "Menlo", "Consolas", monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #10243e;
+}
+
+/* Erina's replies, set apart from the user's by colour as well as by side. */
+.reply-label {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #dfe4ea;
+    -fx-border-radius: 12;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.text-field {
+    -fx-font-size: 13px;
+    -fx-background-radius: 0;
+}
+
+.button {
+    -fx-background-radius: 0;
+    -fx-background-color: #2f6fb2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.button:hover {
+    -fx-background-color: #3b82cc;
+}
