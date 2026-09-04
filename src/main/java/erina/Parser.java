@@ -1,10 +1,11 @@
 package erina;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import erina.task.Deadline;
 import erina.task.Event;
 import erina.task.Todo;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
 /**
  * Turns the text the user types into the objects the program works with.
