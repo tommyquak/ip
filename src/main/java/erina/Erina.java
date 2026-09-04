@@ -1,9 +1,9 @@
 package erina;
 
-import erina.task.Task;
-
 import java.nio.file.Path;
 import java.util.List;
+
+import erina.task.Task;
 
 /**
  * Entry point of the Erina chatbot.
@@ -118,35 +118,35 @@ public class Erina {
      */
     private void handleCommand(Command command, String argument) throws ErinaException {
         switch (command) {
-        case LIST:
-            listTasks();
-            break;
-        case MARK:
-            setDone(argument, true);
-            break;
-        case UNMARK:
-            setDone(argument, false);
-            break;
-        case TODO:
-            addTask(Parser.parseTodo(argument));
-            break;
-        case DEADLINE:
-            addTask(Parser.parseDeadline(argument));
-            break;
-        case EVENT:
-            addTask(Parser.parseEvent(argument));
-            break;
-        case DELETE:
-            deleteTask(argument);
-            break;
-        case FIND:
-            findTasks(argument);
-            break;
-        default:
-            // BYE is handled by the main loop, which has to stop reading.
-            // Unknown words never reach here: Command.fromKeyword rejects them.
-            throw new ErinaException(
-                    "OOPS!!! I'm sorry, but I don't know what that means :-(");
+            case LIST:
+                listTasks();
+                break;
+            case MARK:
+                setDone(argument, true);
+                break;
+            case UNMARK:
+                setDone(argument, false);
+                break;
+            case TODO:
+                addTask(Parser.parseTodo(argument));
+                break;
+            case DEADLINE:
+                addTask(Parser.parseDeadline(argument));
+                break;
+            case EVENT:
+                addTask(Parser.parseEvent(argument));
+                break;
+            case DELETE:
+                deleteTask(argument);
+                break;
+            case FIND:
+                findTasks(argument);
+                break;
+            default:
+                // BYE is handled by the main loop, which has to stop reading.
+                // Unknown words never reach here: Command.fromKeyword rejects them.
+                throw new ErinaException(
+                        "OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
     }
 

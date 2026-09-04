@@ -16,12 +16,12 @@ public class Ui {
     private static final String DIVIDER =
             "    ____________________________________________________________";
 
+    /** Where user input is read from. */
+    private final Scanner scanner = new Scanner(System.in);
+
     /** Creates a Ui that reads from standard input and prints to standard output. */
     public Ui() {
     }
-
-    /** Where user input is read from. */
-    private final Scanner scanner = new Scanner(System.in);
 
     /** Prints the banner and Erina's opening message. */
     public void showWelcome() {

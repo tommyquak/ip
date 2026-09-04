@@ -1,8 +1,9 @@
 package erina;
 
-import erina.task.Task;
 import java.util.ArrayList;
 import java.util.List;
+
+import erina.task.Task;
 
 /**
  * The list of tasks the user is keeping.
