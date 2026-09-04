@@ -12,6 +12,12 @@ import java.util.Scanner;
  * only this class.
  */
 public class Ui {
+    /** Erina's opening message, shared by the console and the GUI. */
+    public static final String GREETING = "Hello! I'm Erina\nWhat can I do for you?";
+
+    /** Erina's farewell message, shared by the console and the GUI. */
+    public static final String FAREWELL = "Bye. Hope to see you again soon!";
+
     /** Horizontal rule used to visually separate each of Erina's replies. */
     private static final String DIVIDER =
             "    ____________________________________________________________";
@@ -32,12 +38,12 @@ public class Ui {
                 + "|_____|_|  |_|_| |_|\\__,_|\n";
         System.out.println(banner);
 
-        reply("Hello! I'm Erina", "What can I do for you?");
+        reply(GREETING.split("\n"));
     }
 
     /** Prints Erina's farewell message, shown just before the program ends. */
     public void showGoodbye() {
-        reply("Bye. Hope to see you again soon!");
+        reply(FAREWELL);
     }
 
     /**
