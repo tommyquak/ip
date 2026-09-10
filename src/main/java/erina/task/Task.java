@@ -25,6 +25,8 @@ public abstract class Task {
      * @param description what the user wants to do
      */
     public Task(String description) {
+        // Callers always pass real text; a missing description is a bug, not user error.
+        assert description != null : "task needs a description";
         this.description = description;
         this.isDone = false;
     }
