@@ -94,6 +94,8 @@ public class Storage {
      * @throws ErinaException if the file cannot be written
      */
     public void save(List<Task> tasks) throws ErinaException {
+        assert tasks != null : "nothing to save: task list is null";
+
         // One line per task, in list order.
         List<String> lines = tasks.stream()
                 .map(Task::toSaveString)
@@ -135,6 +137,9 @@ public class Storage {
             default:
                 throw new ErinaException("Unknown task type: " + fields[0]);
         }
+
+        // Every branch of the switch either assigns a task or throws.
+        assert task != null : "parseTask produced no task for: " + line;
 
         if (fields[1].equals("1")) {
             task.markAsDone();

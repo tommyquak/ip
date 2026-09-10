@@ -20,6 +20,7 @@ public class Event extends Task {
      */
     public Event(String description, String from, String to) {
         super(description);
+        assert from != null && to != null : "an event needs both a start and an end";
         this.from = from;
         this.to = to;
     }
