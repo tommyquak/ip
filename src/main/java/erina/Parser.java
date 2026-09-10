@@ -21,6 +21,23 @@ public class Parser {
     }
 
     /**
+     * Splits one line of input into the command word and its argument.
+     *
+     * <p>Commands taking an argument ({@code mark 2}) have to be told apart
+     * from commands that do not ({@code list}), so the line is split at the
+     * first space only: everything after it belongs to the argument.
+     *
+     * @param input one line as typed by the user, not blank
+     * @return the command and the text that followed it
+     * @throws ErinaException if the first word is not a command
+     */
+    public static ParsedCommand parse(String input) throws ErinaException {
+        String[] parts = input.trim().split(" ", 2);
+        String argument = parts.length > 1 ? parts[1].trim() : "";
+        return new ParsedCommand(Command.fromKeyword(parts[0]), argument);
+    }
+
+    /**
      * Builds a to-do from the text after the {@code todo} command.
      *
      * @param argument the text after the command word

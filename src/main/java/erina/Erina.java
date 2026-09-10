@@ -131,26 +131,18 @@ public class Erina {
      * @return the reply, whose lines are separated by newlines
      */
     public String getResponse(String input) {
-        String trimmed = input.trim();
-        if (trimmed.isEmpty()) {
+        if (input.isBlank()) {
             return "";
         }
 
-        // Split into the command word and everything after it, so that
-        // commands taking an argument (mark 2) can be told apart from
-        // commands that do not (list).
-        String[] parts = trimmed.split(" ", 2);
-        String keyword = parts[0];
-        String argument = parts.length > 1 ? parts[1].trim() : "";
-
         try {
-            Command command = Command.fromKeyword(keyword);
-            if (command == Command.BYE) {
+            ParsedCommand parsed = Parser.parse(input);
+            if (parsed.command() == Command.BYE) {
                 isExit = true;
                 return Ui.FAREWELL;
             }
 
-            String response = handleCommand(command, argument);
+            String response = handleCommand(parsed.command(), parsed.argument());
 
             // Saving after every successful command, in one place, keeps
             // the file in step with the list without each command having
