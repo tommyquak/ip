@@ -1,7 +1,6 @@
 package erina.gui;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 import erina.Erina;
 import javafx.application.Application;
@@ -14,11 +13,8 @@ import javafx.stage.Stage;
  * The JavaFX application: builds the window and hands it an {@link Erina}.
  */
 public class Main extends Application {
-    /** Where the task list is kept between runs. */
-    private static final Path SAVE_FILE = Path.of("data", "erina.txt");
-
     /** The chatbot the window talks to. */
-    private final Erina erina = new Erina(SAVE_FILE);
+    private final Erina erina = new Erina();
 
     @Override
     public void start(Stage stage) {
