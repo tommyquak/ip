@@ -1,5 +1,8 @@
 package erina.task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A single item on the user's list.
  *
@@ -9,10 +12,14 @@ package erina.task;
  *
  * <p>This class is abstract because every task the user can create is one of
  * the specific kinds below it ({@link Todo}, {@link Deadline}, {@link Event}).
- * Each kind decides how it is shown by overriding {@link #toString()}, while
- * the description and completion flag are handled once, here.
+ * The description and completion flag are handled once, here; each kind
+ * supplies only what makes it different: its {@link #getTypeCode() type code}
+ * and any {@link #getExtraSaveFields() extra fields} it needs to save.
  */
 public abstract class Task {
+    /** Separator between the fields of one saved task. */
+    public static final String SAVE_SEPARATOR = " | ";
+
     /** What the user wants to do. Fixed once the task is created. */
     private final String description;
 
@@ -60,17 +67,46 @@ public abstract class Task {
     }
 
     /**
+     * Returns the single letter that identifies this kind of task, used both
+     * in the display form ({@code [T]}) and as the first field of the save
+     * form.
+     *
+     * @return {@code "T"}, {@code "D"} or {@code "E"}
+     */
+    public abstract String getTypeCode();
+
+    /**
+     * Returns the fields, beyond the description, that this kind of task
+     * needs in order to be rebuilt from the save file.
+     *
+     * <p>The default is none, which is right for a plain to-do. Kinds with
+     * extra detail, such as a due date, override this.
+     *
+     * @return the extra fields, in the order they are saved
+     */
+    protected List<String> getExtraSaveFields() {
+        return List.of();
+    }
+
+    /**
      * Returns this task in the form it is written to the save file, for
      * example {@code T | 1 | read book}.
      *
-     * <p>Each kind of task knows its own fields, so each kind decides its
-     * own save form, the same way each decides its own {@link #toString()}.
-     * The save form is machine-facing and stable; toString is user-facing
-     * and free to change, which is why they are separate methods.
+     * <p>The save form is machine-facing and stable; {@link #toString()} is
+     * user-facing and free to change, which is why they are separate. Both
+     * are assembled here so that the layout is decided in one place, and a
+     * new kind of task only has to say what its extra fields are.
      *
      * @return this task as one line of the save file
      */
-    public abstract String toSaveString();
+    public String toSaveString() {
+        List<String> fields = new ArrayList<>();
+        fields.add(getTypeCode());
+        fields.add(isDone ? "1" : "0");
+        fields.add(description);
+        fields.addAll(getExtraSaveFields());
+        return String.join(SAVE_SEPARATOR, fields);
+    }
 
     /**
      * Returns the symbol shown inside the status box.
@@ -82,13 +118,13 @@ public abstract class Task {
     }
 
     /**
-     * Returns the status box and description shared by every kind of task,
-     * for example {@code [X] read book}.
+     * Returns the type box, status box and description shared by every kind
+     * of task, for example {@code [T][X] read book}.
      *
-     * <p>Subclasses prepend their own type box and append any extra detail.
+     * <p>Subclasses append any extra detail of their own.
      */
     @Override
     public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
+        return "[" + getTypeCode() + "][" + getStatusIcon() + "] " + description;
     }
 }

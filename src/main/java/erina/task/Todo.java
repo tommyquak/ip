@@ -14,12 +14,7 @@ public class Todo extends Task {
     }
 
     @Override
-    public String toSaveString() {
-        return "T | " + (isDone() ? "1" : "0") + " | " + getDescription();
-    }
-
-    @Override
-    public String toString() {
-        return "[T]" + super.toString();
+    public String getTypeCode() {
+        return "T";
     }
 }

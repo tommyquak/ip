@@ -27,9 +27,6 @@ import erina.task.Todo;
  * </pre>
  */
 public class Storage {
-    /** Separator between the fields of one saved task. */
-    private static final String FIELD_SEPARATOR = " | ";
-
     /** Where the task list is kept between runs. */
     private final Path filePath;
 
@@ -120,7 +117,7 @@ public class Storage {
     private Task parseTask(String line) throws ErinaException {
         // The separator contains |, which is a special character in regular
         // expressions, so split on its literal quoted form.
-        String[] fields = line.split(Pattern.quote(FIELD_SEPARATOR));
+        String[] fields = line.split(Pattern.quote(Task.SAVE_SEPARATOR));
 
         Task task;
         switch (fields[0]) {

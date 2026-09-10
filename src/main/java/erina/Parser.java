@@ -16,8 +16,29 @@ import erina.task.Todo;
  * this class.
  */
 public class Parser {
+    /** Shown whenever an event command is missing one of its three parts. */
+    private static final String EVENT_FORMAT_MESSAGE = "OOPS!!! An event needs a description, "
+            + "a /from time and a /to time, like: event project meeting /from Mon 2pm /to 4pm";
+
     /** This class is not meant to be instantiated; its methods are static. */
     private Parser() {
+    }
+
+    /**
+     * Splits one line of input into the command word and its argument.
+     *
+     * <p>Commands taking an argument ({@code mark 2}) have to be told apart
+     * from commands that do not ({@code list}), so the line is split at the
+     * first space only: everything after it belongs to the argument.
+     *
+     * @param input one line as typed by the user, not blank
+     * @return the command and the text that followed it
+     * @throws ErinaException if the first word is not a command
+     */
+    public static ParsedCommand parse(String input) throws ErinaException {
+        String[] parts = input.trim().split(" ", 2);
+        String argument = parts.length > 1 ? parts[1].trim() : "";
+        return new ParsedCommand(Command.fromKeyword(parts[0]), argument);
     }
 
     /**
@@ -76,14 +97,12 @@ public class Parser {
 
         String[] fromParts = argument.split(" /from ", 2);
         if (fromParts.length < 2 || fromParts[0].isBlank()) {
-            throw new ErinaException("OOPS!!! An event needs a description, a /from "
-                    + "time and a /to time, like: event project meeting /from Mon 2pm /to 4pm");
+            throw new ErinaException(EVENT_FORMAT_MESSAGE);
         }
 
         String[] toParts = fromParts[1].split(" /to ", 2);
         if (toParts.length < 2 || toParts[0].isBlank() || toParts[1].isBlank()) {
-            throw new ErinaException("OOPS!!! An event needs a description, a /from "
-                    + "time and a /to time, like: event project meeting /from Mon 2pm /to 4pm");
+            throw new ErinaException(EVENT_FORMAT_MESSAGE);
         }
         return new Event(fromParts[0].trim(), toParts[0].trim(), toParts[1].trim());
     }

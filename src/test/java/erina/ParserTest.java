@@ -18,6 +18,25 @@ import erina.task.Todo;
  */
 public class ParserTest {
     @Test
+    public void parse_commandWithArgument_splitsAtFirstSpace() throws ErinaException {
+        ParsedCommand parsed = Parser.parse("deadline return book /by 2019-10-15");
+        assertEquals(Command.DEADLINE, parsed.command());
+        assertEquals("return book /by 2019-10-15", parsed.argument());
+    }
+
+    @Test
+    public void parse_commandAlone_hasEmptyArgument() throws ErinaException {
+        ParsedCommand parsed = Parser.parse("  list  ");
+        assertEquals(Command.LIST, parsed.command());
+        assertEquals("", parsed.argument());
+    }
+
+    @Test
+    public void parse_unknownCommandWord_throws() {
+        assertThrows(ErinaException.class, () -> Parser.parse("blah"));
+    }
+
+    @Test
     public void parseTodo_normalDescription_returnsTodo() throws ErinaException {
         Todo todo = Parser.parseTodo("read book");
         assertEquals("[T][ ] read book", todo.toString());
