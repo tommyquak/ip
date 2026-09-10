@@ -126,7 +126,9 @@ public class Parser {
         }
 
         // The user counts from 1 but the list is indexed from 0.
-        return number - 1;
+        int index = number - 1;
+        assert index >= 0 && index < taskCount : "validated index out of range: " + index;
+        return index;
     }
 
     /**

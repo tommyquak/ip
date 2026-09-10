@@ -145,6 +145,7 @@ public class Erina {
 
         try {
             Command command = Command.fromKeyword(keyword);
+            assert command != null : "fromKeyword returns a command or throws";
             if (command == Command.BYE) {
                 isExit = true;
                 return Ui.FAREWELL;
@@ -185,6 +186,10 @@ public class Erina {
      * @throws ErinaException if the argument is missing or does not make sense
      */
     private String handleCommand(Command command, String argument) throws ErinaException {
+        // getResponse deals with bye itself, because it also has to stop the loop.
+        assert command != Command.BYE : "bye must be handled before reaching handleCommand";
+        assert argument != null : "argument is empty rather than null when absent";
+
         switch (command) {
             case LIST:
                 return listTasks();
@@ -217,7 +222,9 @@ public class Erina {
      * @return the confirmation to show
      */
     private String addTask(Task task) {
+        int sizeBefore = tasks.size();
         tasks.add(task);
+        assert tasks.size() == sizeBefore + 1 : "adding a task must grow the list by one";
         return respond(
                 "Got it. I've added this task:",
                 "  " + task,
