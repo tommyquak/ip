@@ -72,4 +72,7 @@ shadowJar {
 
 run {
     standardInput = System.in
+    // Assertions are off by default in the JVM; turn them on so that the
+    // assumptions documented with `assert` are actually checked during development.
+    enableAssertions = true
 }
