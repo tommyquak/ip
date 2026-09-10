@@ -2,6 +2,8 @@ package erina;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import erina.task.Task;
 
@@ -308,19 +310,18 @@ public class Erina {
      * Formats tasks as a heading followed by one numbered line per task.
      *
      * <p>Every command that shows several tasks goes through here, so they
-     * all number and lay out tasks the same way.
+     * all number and lay out tasks the same way. An IntStream over the
+     * positions gives the number and the task together, which a plain
+     * stream over the tasks cannot do.
      *
      * @param heading the line shown above the tasks
      * @param tasks   the tasks to show, in the order they should appear
      * @return the heading and the numbered tasks, one per line
      */
     private static String numberedList(String heading, List<Task> tasks) {
-        String[] lines = new String[tasks.size() + 1];
-        lines[0] = heading;
-        for (int i = 0; i < tasks.size(); i++) {
-            // Users count from 1, so display position i as i + 1.
-            lines[i + 1] = (i + 1) + "." + tasks.get(i);
-        }
-        return respond(lines);
+        Stream<String> numbered = IntStream.range(0, tasks.size())
+                // Users count from 1, so display position i as i + 1.
+                .mapToObj(i -> (i + 1) + "." + tasks.get(i));
+        return respond(Stream.concat(Stream.of(heading), numbered).toArray(String[]::new));
     }
 }

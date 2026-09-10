@@ -1,5 +1,8 @@
 package erina;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * The set of instructions Erina understands.
  *
@@ -55,13 +58,17 @@ public enum Command {
      * @throws ErinaException if no command uses that keyword
      */
     public static Command fromKeyword(String keyword) throws ErinaException {
-        for (Command command : values()) {
-            if (command.keyword.equals(keyword)) {
-                return command;
-            }
+        // Optional makes the "not found" case explicit instead of falling out
+        // of a loop; the checked exception is thrown outside the stream, since
+        // lambdas cannot throw checked exceptions.
+        Optional<Command> match = Arrays.stream(values())
+                .filter(command -> command.keyword.equals(keyword))
+                .findFirst();
+        if (match.isEmpty()) {
+            throw new ErinaException(
+                    "OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
-        throw new ErinaException(
-                "OOPS!!! I'm sorry, but I don't know what that means :-(");
+        return match.get();
     }
 
     /**
