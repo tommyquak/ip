@@ -206,12 +206,29 @@ public class Erina {
                 return deleteTask(argument);
             case FIND:
                 return findTasks(argument);
+            case HELP:
+                return showHelp();
             default:
                 // BYE is handled by getResponse, which has to stop the loop, and
                 // unknown words never reach here: Command.fromKeyword rejects them.
                 // So this is a programming error, not something to tell the user.
                 throw new IllegalStateException("Unhandled command: " + command);
         }
+    }
+
+    /**
+     * Lists every command Erina understands, with how to type it.
+     *
+     * <p>The list comes from {@link Command#describeAll()}, so it is always
+     * in step with the commands that actually exist.
+     *
+     * @return the help text
+     */
+    private String showHelp() {
+        return respond(
+                "Here's what I can do:",
+                Command.describeAll(),
+                "Dates are typed as yyyy-mm-dd, like 2019-10-15.");
     }
 
     /**
