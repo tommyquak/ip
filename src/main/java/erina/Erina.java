@@ -26,8 +26,8 @@ import erina.task.Task;
  * in a dialog box. Behaviour therefore cannot drift between the two.
  */
 public class Erina {
-    /** Where the task list is kept between runs. */
-    private static final Path SAVE_FILE = Path.of("data", "erina.txt");
+    /** Where the task list is kept between runs, unless a caller says otherwise. */
+    public static final Path DEFAULT_SAVE_FILE = Path.of("data", "erina.txt");
 
     /** Keeps the task list on disk between runs. */
     private final Storage storage;
@@ -43,6 +43,11 @@ public class Erina {
 
     /** What went wrong while loading, or {@code null} if loading succeeded. */
     private String loadError;
+
+    /** Creates an Erina that saves its tasks to the {@link #DEFAULT_SAVE_FILE}. */
+    public Erina() {
+        this(DEFAULT_SAVE_FILE);
+    }
 
     /**
      * Creates an Erina that saves its tasks to the given file.
@@ -88,7 +93,7 @@ public class Erina {
      * @param args not used
      */
     public static void main(String[] args) {
-        new Erina(SAVE_FILE).run();
+        new Erina().run();
     }
 
     /** Greets the user, serves commands until they leave, then says goodbye. */
