@@ -13,7 +13,8 @@ import java.util.Scanner;
  */
 public class Ui {
     /** Erina's opening message, shared by the console and the GUI. */
-    public static final String GREETING = "Hello! I'm Erina\nWhat can I do for you?";
+    public static final String GREETING =
+            "Hello! I'm Erina\nWhat can I do for you? Type help to see the commands.";
 
     /** Erina's farewell message, shared by the console and the GUI. */
     public static final String FAREWELL = "Bye. Hope to see you again soon!";
