@@ -200,10 +200,10 @@ public class Erina {
             case FIND:
                 return findTasks(argument);
             default:
-                // BYE is handled by the main loop, which has to stop reading.
-                // Unknown words never reach here: Command.fromKeyword rejects them.
-                throw new ErinaException(
-                        "OOPS!!! I'm sorry, but I don't know what that means :-(");
+                // BYE is handled by getResponse, which has to stop the loop, and
+                // unknown words never reach here: Command.fromKeyword rejects them.
+                // So this is a programming error, not something to tell the user.
+                throw new IllegalStateException("Unhandled command: " + command);
         }
     }
 
@@ -253,10 +253,10 @@ public class Erina {
 
         if (isDone) {
             task.markAsDone();
-            return "Nice! I've marked this task as done:\n  " + task;
+            return respond("Nice! I've marked this task as done:", "  " + task);
         }
         task.markAsNotDone();
-        return "OK, I've marked this task as not done yet:\n  " + task;
+        return respond("OK, I've marked this task as not done yet:", "  " + task);
     }
 
     /**
