@@ -89,13 +89,12 @@ public class TaskList {
      * @return the matching tasks, in the order they appear in the list
      */
     public List<Task> find(String keyword) {
-        List<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase().contains(keyword.toLowerCase())) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        String needle = keyword.toLowerCase();
+        // A stream says what is wanted (the tasks that match) rather than how
+        // to collect them, and keeps list order because it is sequential.
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase().contains(needle))
+                .toList();
     }
 
     /**

@@ -94,10 +94,10 @@ public class Storage {
      * @throws ErinaException if the file cannot be written
      */
     public void save(List<Task> tasks) throws ErinaException {
-        List<String> lines = new ArrayList<>();
-        for (Task task : tasks) {
-            lines.add(task.toSaveString());
-        }
+        // One line per task, in list order.
+        List<String> lines = tasks.stream()
+                .map(Task::toSaveString)
+                .toList();
 
         try {
             // The folder does not exist until the first save on a new machine.

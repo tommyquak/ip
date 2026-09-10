@@ -2,6 +2,8 @@ package erina;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import erina.task.Task;
 
@@ -284,12 +286,9 @@ public class Erina {
             return "No tasks match \"" + argument + "\".";
         }
 
-        String[] lines = new String[matches.size() + 1];
-        lines[0] = "Here are the matching tasks in your list:";
-        for (int i = 0; i < matches.size(); i++) {
-            lines[i + 1] = (i + 1) + "." + matches.get(i);
-        }
-        return respond(lines);
+        return respond(Stream.concat(
+                Stream.of("Here are the matching tasks in your list:"),
+                numberTasks(matches)).toArray(String[]::new));
     }
 
     /**
@@ -305,12 +304,23 @@ public class Erina {
         }
 
         // One heading line, then one line per task.
-        String[] lines = new String[tasks.size() + 1];
-        lines[0] = "Here are the tasks in your list:";
-        for (int i = 0; i < tasks.size(); i++) {
-            // Users count from 1, so display position i as i + 1.
-            lines[i + 1] = (i + 1) + "." + tasks.get(i);
-        }
-        return respond(lines);
+        return respond(Stream.concat(
+                Stream.of("Here are the tasks in your list:"),
+                numberTasks(tasks.asList())).toArray(String[]::new));
+    }
+
+    /**
+     * Returns one line per task, numbered from 1 in list order.
+     *
+     * <p>An IntStream over the positions gives the number and the task
+     * together, which a plain stream over the tasks cannot do.
+     *
+     * @param tasks the tasks to number
+     * @return lines such as {@code 1.[T][ ] read book}
+     */
+    private static Stream<String> numberTasks(List<Task> tasks) {
+        return IntStream.range(0, tasks.size())
+                // Users count from 1, so display position i as i + 1.
+                .mapToObj(i -> (i + 1) + "." + tasks.get(i));
     }
 }
