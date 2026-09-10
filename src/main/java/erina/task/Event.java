@@ -1,5 +1,7 @@
 package erina.task;
 
+import java.util.List;
+
 /**
  * A task that spans a period of time, shown as
  * {@code [E][ ] project meeting (from: Mon 2pm to: 4pm)}.
@@ -26,13 +28,17 @@ public class Event extends Task {
     }
 
     @Override
-    public String toSaveString() {
-        return "E | " + (isDone() ? "1" : "0") + " | " + getDescription()
-                + " | " + from + " | " + to;
+    public String getTypeCode() {
+        return "E";
+    }
+
+    @Override
+    protected List<String> getExtraSaveFields() {
+        return List.of(from, to);
     }
 
     @Override
     public String toString() {
-        return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
+        return super.toString() + " (from: " + from + " to: " + to + ")";
     }
 }

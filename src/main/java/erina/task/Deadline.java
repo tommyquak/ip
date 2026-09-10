@@ -2,6 +2,7 @@ package erina.task;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * A task that must be finished by a stated date, shown as
@@ -33,15 +34,19 @@ public class Deadline extends Task {
     }
 
     @Override
-    public String toSaveString() {
+    public String getTypeCode() {
+        return "D";
+    }
+
+    @Override
+    protected List<String> getExtraSaveFields() {
         // LocalDate.toString gives the ISO form (2019-10-15), the same form
         // the user types, so the file stays easy to read and to parse back.
-        return "D | " + (isDone() ? "1" : "0") + " | " + getDescription()
-                + " | " + by;
+        return List.of(by.toString());
     }
 
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (by: " + by.format(DISPLAY_FORMAT) + ")";
+        return super.toString() + " (by: " + by.format(DISPLAY_FORMAT) + ")";
     }
 }

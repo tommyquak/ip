@@ -28,8 +28,8 @@ import erina.task.Task;
  * in a dialog box. Behaviour therefore cannot drift between the two.
  */
 public class Erina {
-    /** Where the task list is kept between runs. */
-    private static final Path SAVE_FILE = Path.of("data", "erina.txt");
+    /** Where the task list is kept between runs, unless a caller says otherwise. */
+    public static final Path DEFAULT_SAVE_FILE = Path.of("data", "erina.txt");
 
     /** Keeps the task list on disk between runs. */
     private final Storage storage;
@@ -45,6 +45,11 @@ public class Erina {
 
     /** What went wrong while loading, or {@code null} if loading succeeded. */
     private String loadError;
+
+    /** Creates an Erina that saves its tasks to the {@link #DEFAULT_SAVE_FILE}. */
+    public Erina() {
+        this(DEFAULT_SAVE_FILE);
+    }
 
     /**
      * Creates an Erina that saves its tasks to the given file.
@@ -90,7 +95,7 @@ public class Erina {
      * @param args not used
      */
     public static void main(String[] args) {
-        new Erina(SAVE_FILE).run();
+        new Erina().run();
     }
 
     /** Greets the user, serves commands until they leave, then says goodbye. */
@@ -133,27 +138,19 @@ public class Erina {
      * @return the reply, whose lines are separated by newlines
      */
     public String getResponse(String input) {
-        String trimmed = input.trim();
-        if (trimmed.isEmpty()) {
+        if (input.isBlank()) {
             return "";
         }
 
-        // Split into the command word and everything after it, so that
-        // commands taking an argument (mark 2) can be told apart from
-        // commands that do not (list).
-        String[] parts = trimmed.split(" ", 2);
-        String keyword = parts[0];
-        String argument = parts.length > 1 ? parts[1].trim() : "";
-
         try {
-            Command command = Command.fromKeyword(keyword);
-            assert command != null : "fromKeyword returns a command or throws";
-            if (command == Command.BYE) {
+            ParsedCommand parsed = Parser.parse(input);
+            assert parsed.command() != null : "Parser.parse returns a command or throws";
+            if (parsed.command() == Command.BYE) {
                 isExit = true;
                 return Ui.FAREWELL;
             }
 
-            String response = handleCommand(command, argument);
+            String response = handleCommand(parsed.command(), parsed.argument());
 
             // Saving after every successful command, in one place, keeps
             // the file in step with the list without each command having
@@ -210,10 +207,10 @@ public class Erina {
             case FIND:
                 return findTasks(argument);
             default:
-                // BYE is handled by the main loop, which has to stop reading.
-                // Unknown words never reach here: Command.fromKeyword rejects them.
-                throw new ErinaException(
-                        "OOPS!!! I'm sorry, but I don't know what that means :-(");
+                // BYE is handled by getResponse, which has to stop the loop, and
+                // unknown words never reach here: Command.fromKeyword rejects them.
+                // So this is a programming error, not something to tell the user.
+                throw new IllegalStateException("Unhandled command: " + command);
         }
     }
 
@@ -265,10 +262,10 @@ public class Erina {
 
         if (isDone) {
             task.markAsDone();
-            return "Nice! I've marked this task as done:\n  " + task;
+            return respond("Nice! I've marked this task as done:", "  " + task);
         }
         task.markAsNotDone();
-        return "OK, I've marked this task as not done yet:\n  " + task;
+        return respond("OK, I've marked this task as not done yet:", "  " + task);
     }
 
     /**
@@ -292,10 +289,7 @@ public class Erina {
         if (matches.isEmpty()) {
             return "No tasks match \"" + argument + "\".";
         }
-
-        return respond(Stream.concat(
-                Stream.of("Here are the matching tasks in your list:"),
-                numberTasks(matches)).toArray(String[]::new));
+        return numberedList("Here are the matching tasks in your list:", matches);
     }
 
     /**
@@ -309,25 +303,25 @@ public class Erina {
         if (tasks.isEmpty()) {
             return "Your list is empty. Add something to get started!";
         }
-
-        // One heading line, then one line per task.
-        return respond(Stream.concat(
-                Stream.of("Here are the tasks in your list:"),
-                numberTasks(tasks.asList())).toArray(String[]::new));
+        return numberedList("Here are the tasks in your list:", tasks.asList());
     }
 
     /**
-     * Returns one line per task, numbered from 1 in list order.
+     * Formats tasks as a heading followed by one numbered line per task.
      *
-     * <p>An IntStream over the positions gives the number and the task
-     * together, which a plain stream over the tasks cannot do.
+     * <p>Every command that shows several tasks goes through here, so they
+     * all number and lay out tasks the same way. An IntStream over the
+     * positions gives the number and the task together, which a plain
+     * stream over the tasks cannot do.
      *
-     * @param tasks the tasks to number
-     * @return lines such as {@code 1.[T][ ] read book}
+     * @param heading the line shown above the tasks
+     * @param tasks   the tasks to show, in the order they should appear
+     * @return the heading and the numbered tasks, one per line
      */
-    private static Stream<String> numberTasks(List<Task> tasks) {
-        return IntStream.range(0, tasks.size())
+    private static String numberedList(String heading, List<Task> tasks) {
+        Stream<String> numbered = IntStream.range(0, tasks.size())
                 // Users count from 1, so display position i as i + 1.
                 .mapToObj(i -> (i + 1) + "." + tasks.get(i));
+        return respond(Stream.concat(Stream.of(heading), numbered).toArray(String[]::new));
     }
 }
