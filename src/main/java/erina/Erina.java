@@ -283,13 +283,7 @@ public class Erina {
         if (matches.isEmpty()) {
             return "No tasks match \"" + argument + "\".";
         }
-
-        String[] lines = new String[matches.size() + 1];
-        lines[0] = "Here are the matching tasks in your list:";
-        for (int i = 0; i < matches.size(); i++) {
-            lines[i + 1] = (i + 1) + "." + matches.get(i);
-        }
-        return respond(lines);
+        return numberedList("Here are the matching tasks in your list:", matches);
     }
 
     /**
@@ -303,10 +297,22 @@ public class Erina {
         if (tasks.isEmpty()) {
             return "Your list is empty. Add something to get started!";
         }
+        return numberedList("Here are the tasks in your list:", tasks.asList());
+    }
 
-        // One heading line, then one line per task.
+    /**
+     * Formats tasks as a heading followed by one numbered line per task.
+     *
+     * <p>Every command that shows several tasks goes through here, so they
+     * all number and lay out tasks the same way.
+     *
+     * @param heading the line shown above the tasks
+     * @param tasks   the tasks to show, in the order they should appear
+     * @return the heading and the numbered tasks, one per line
+     */
+    private static String numberedList(String heading, List<Task> tasks) {
         String[] lines = new String[tasks.size() + 1];
-        lines[0] = "Here are the tasks in your list:";
+        lines[0] = heading;
         for (int i = 0; i < tasks.size(); i++) {
             // Users count from 1, so display position i as i + 1.
             lines[i + 1] = (i + 1) + "." + tasks.get(i);
