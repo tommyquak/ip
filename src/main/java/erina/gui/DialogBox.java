@@ -39,6 +39,10 @@ public class DialogBox extends HBox {
             System.err.println("Could not load a dialog box: " + e.getMessage());
         }
 
+        // Both controls are declared with fx:id in DialogBox.fxml, so a null
+        // here means the FXML and this class have drifted apart.
+        assert dialog != null && displayPicture != null : "DialogBox.fxml did not inject its controls";
+
         dialog.setText(text);
         displayPicture.setImage(img);
 
