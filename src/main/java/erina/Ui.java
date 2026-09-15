@@ -14,10 +14,11 @@ import java.util.Scanner;
 public class Ui {
     /** Erina's opening message, shared by the console and the GUI. */
     public static final String GREETING =
-            "Hello! I'm Erina\nWhat can I do for you? Type help to see the commands.";
+            "Good day. I'm Erina, and I keep impeccable lists.\n"
+            + "What shall we put in order today? Type help to see what I can do.";
 
     /** Erina's farewell message, shared by the console and the GUI. */
-    public static final String FAREWELL = "Bye. Hope to see you again soon!";
+    public static final String FAREWELL = "Everything is in order. Until next time!";
 
     /** Horizontal rule used to visually separate each of Erina's replies. */
     private static final String DIVIDER =

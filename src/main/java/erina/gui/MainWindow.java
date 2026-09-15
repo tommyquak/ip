@@ -28,9 +28,9 @@ public class MainWindow extends AnchorPane {
     private Erina erina;
 
     private final Image userImage =
-            new Image(this.getClass().getResourceAsStream("/images/DaUser.png"));
+            new Image(this.getClass().getResourceAsStream("/images/user.png"));
     private final Image erinaImage =
-            new Image(this.getClass().getResourceAsStream("/images/DaErina.png"));
+            new Image(this.getClass().getResourceAsStream("/images/erina.png"));
 
     /** Keeps the newest dialog box in view as the conversation grows. */
     @FXML

@@ -67,7 +67,7 @@ public class Erina {
             this.tasks = new TaskList(storage.load());
         } catch (ErinaException e) {
             this.loadError = respond(e.getMessage(), backUpUnreadableFile(),
-                    "I'll start with an empty list instead.");
+                    "I shall start you on a fresh list instead.");
             this.tasks = new TaskList();
         }
     }
@@ -185,7 +185,7 @@ public class Erina {
      */
     private String backUpUnreadableFile() {
         try {
-            return "I kept a copy of it at " + storage.backUp() + ", in case you want to fix it.";
+            return "I have kept a copy at " + storage.backUp() + ", should you wish to repair it.";
         } catch (ErinaException e) {
             return e.getMessage();
         }
@@ -243,9 +243,9 @@ public class Erina {
      */
     private String showHelp() {
         return respond(
-                "Here's what I can do:",
+                "Here is everything I can do for you:",
                 Command.describeAll(),
-                "Dates are typed as yyyy-mm-dd, like 2019-10-15.");
+                "Kindly write dates as yyyy-mm-dd, like 2019-10-15.");
     }
 
     /**
@@ -260,7 +260,7 @@ public class Erina {
         // would leave the user unsure which one to mark or delete.
         if (tasks.contains(task)) {
             throw new ErinaException(respond(
-                    "OOPS!!! That task is already in your list:",
+                    "Pardon me, but that task is already in your list:",
                     "  " + task));
         }
 
@@ -268,9 +268,9 @@ public class Erina {
         tasks.add(task);
         assert tasks.size() == sizeBefore + 1 : "adding a task must grow the list by one";
         return respond(
-                "Got it. I've added this task:",
+                "Noted. I've put this in order for you:",
                 "  " + task,
-                "Now you have " + tasks.size() + " tasks in the list.");
+                describeSize());
     }
 
     /**
@@ -286,9 +286,9 @@ public class Erina {
         // after it is no longer in the list.
         Task removed = tasks.remove(Parser.parseIndex(argument, tasks.size()));
         return respond(
-                "Noted. I've removed this task:",
+                "Very well. I've struck this from your list:",
                 "  " + removed,
-                "Now you have " + tasks.size() + " tasks in the list.");
+                describeSize());
     }
 
     /**
@@ -308,15 +308,15 @@ public class Erina {
 
         if (task.isDone() == isDone) {
             String state = isDone ? "already marked as done:" : "already not done:";
-            return respond("That task is " + state, "  " + task);
+            return respond("No change needed. That task is " + state, "  " + task);
         }
 
         if (isDone) {
             task.markAsDone();
-            return respond("Nice! I've marked this task as done:", "  " + task);
+            return respond("Splendid. I've marked this as done:", "  " + task);
         }
         task.markAsNotDone();
-        return respond("OK, I've marked this task as not done yet:", "  " + task);
+        return respond("Very well, I've reopened this task:", "  " + task);
     }
 
     /**
@@ -332,15 +332,15 @@ public class Erina {
      */
     private String findTasks(String argument) throws ErinaException {
         if (argument.isEmpty()) {
-            throw new ErinaException("OOPS!!! Please tell me what to look for, "
+            throw new ErinaException("Pardon me. Please tell me what to look for, "
                     + "like: find book");
         }
 
         List<Task> matches = tasks.find(argument);
         if (matches.isEmpty()) {
-            return "No tasks match \"" + argument + "\".";
+            return "Nothing in your list mentions \"" + argument + "\".";
         }
-        return numberedList("Here are the matching tasks in your list:", matches);
+        return numberedList("These are the tasks that match:", matches);
     }
 
     /**
@@ -352,9 +352,19 @@ public class Erina {
      */
     private String listTasks() {
         if (tasks.isEmpty()) {
-            return "Your list is empty. Add something to get started!";
+            return "Your list is empty. A clean slate, how refreshing.";
         }
-        return numberedList("Here are the tasks in your list:", tasks.asList());
+        return numberedList("Here is your list, in impeccable order:", tasks.asList());
+    }
+
+    /**
+     * Says how many tasks the list now holds, as a grammatical sentence.
+     *
+     * @return for example {@code "Your list now holds 1 task."}
+     */
+    private String describeSize() {
+        int size = tasks.size();
+        return "Your list now holds " + size + (size == 1 ? " task." : " tasks.");
     }
 
     /**

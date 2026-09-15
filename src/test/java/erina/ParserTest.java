@@ -64,7 +64,7 @@ public class ParserTest {
     @Test
     public void parseTodo_emptyDescription_throws() {
         ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseTodo(""));
-        assertEquals("OOPS!!! The description of a todo cannot be empty.", e.getMessage());
+        assertEquals("Pardon me. The description of a todo cannot be empty.", e.getMessage());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class ParserTest {
     public void parseDeadline_byGivenTwice_throws() {
         String input = "return book /by 2019-10-15 /by 2019-10-16";
         ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseDeadline(input));
-        assertEquals("OOPS!!! Please give /by only once.", e.getMessage());
+        assertEquals("Pardon me. Please give /by only once.", e.getMessage());
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ParserTest {
     @Test
     public void parseIndex_notANumber_throws() {
         ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseIndex("abc", 3));
-        assertEquals("OOPS!!! \"abc\" is not a task number.", e.getMessage());
+        assertEquals("Pardon me. \"abc\" is not a task number.", e.getMessage());
     }
 
     @Test
