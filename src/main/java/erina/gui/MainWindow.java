@@ -14,6 +14,9 @@ import javafx.scene.layout.VBox;
 /**
  * Controller for the main window: turns what the user types into a reply from
  * Erina, and shows both as dialog boxes.
+ *
+ * <p>Adapted from the {@code MainWindow} class in the se-education.org JavaFX
+ * tutorial: https://se-education.org/guides/tutorials/javaFx.html
  */
 public class MainWindow extends AnchorPane {
     @FXML
@@ -50,19 +53,20 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getErinaDialog(Ui.GREETING, erinaImage));
 
         // A save file that could not be read is worth saying out loud, in the
-        // same place the user reads everything else.
+        // same place the user reads everything else, and marked as a problem.
         String loadError = erina.getLoadError();
         if (loadError != null) {
             dialogContainer.getChildren().add(
-                    DialogBox.getErinaDialog(loadError, erinaImage));
+                    DialogBox.getErinaErrorDialog(loadError, erinaImage));
         }
     }
 
     /**
      * Shows the user's input and Erina's reply, then clears the input box.
      *
-     * <p>After a {@code bye} command the window closes, but only once the
-     * farewell has been shown, so the user sees it.
+     * <p>A reply reporting a problem is highlighted, so the user notices that
+     * the command did not work. After a {@code bye} command the window closes,
+     * but only once the farewell has been shown, so the user sees it.
      */
     @FXML
     private void handleUserInput() {
@@ -72,11 +76,18 @@ public class MainWindow extends AnchorPane {
         }
 
         String response = erina.getResponse(input);
+        DialogBox reply = erina.isLastReplyError()
+                ? DialogBox.getErinaErrorDialog(response, erinaImage)
+                : DialogBox.getErinaDialog(response, erinaImage);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getErinaDialog(response, erinaImage)
+                reply
         );
         userInput.clear();
+
+        // Clicking Send moves the focus to the button; give it back to the
+        // input box so the next command can be typed straight away.
+        userInput.requestFocus();
 
         if (erina.isExit()) {
             // Give the farewell a moment on screen before the window goes.

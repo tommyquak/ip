@@ -19,7 +19,11 @@ import javafx.scene.shape.Circle;
  * One line of the conversation: a picture beside the text that was said.
  *
  * <p>The user's dialog boxes read left to right, and Erina's are flipped so
- * the two speakers are easy to tell apart at a glance.
+ * the two speakers are easy to tell apart at a glance. Problems Erina reports
+ * get a style of their own, so they are not mistaken for ordinary replies.
+ *
+ * <p>Adapted from the {@code DialogBox} class in the se-education.org JavaFX
+ * tutorial: https://se-education.org/guides/tutorials/javaFx.html
  */
 public class DialogBox extends HBox {
     @FXML
@@ -80,6 +84,20 @@ public class DialogBox extends HBox {
     public static DialogBox getErinaDialog(String text, Image img) {
         DialogBox db = new DialogBox(text, img);
         db.flip();
+        return db;
+    }
+
+    /**
+     * Returns a dialog box showing a problem Erina is reporting, such as a
+     * mistyped command, highlighted so that the user notices it.
+     *
+     * @param text what went wrong, as Erina explains it
+     * @param img  Erina's picture
+     * @return the dialog box to add to the conversation
+     */
+    public static DialogBox getErinaErrorDialog(String text, Image img) {
+        DialogBox db = getErinaDialog(text, img);
+        db.dialog.getStyleClass().add("error-label");
         return db;
     }
 }

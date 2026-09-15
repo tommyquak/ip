@@ -46,6 +46,12 @@ public class Erina {
     /** What went wrong while loading, or {@code null} if loading succeeded. */
     private String loadError;
 
+    /**
+     * Whether the most recent reply reports a problem rather than a result,
+     * so that the GUI can make errors stand out.
+     */
+    private boolean isLastReplyError;
+
     /** Creates an Erina that saves its tasks to the {@link #DEFAULT_SAVE_FILE}. */
     public Erina() {
         this(DEFAULT_SAVE_FILE);
@@ -88,6 +94,16 @@ public class Erina {
      */
     public boolean isExit() {
         return isExit;
+    }
+
+    /**
+     * Returns whether the most recent reply from {@link #getResponse(String)}
+     * reports a problem, such as a mistyped command.
+     *
+     * @return {@code true} if the last command could not be carried out
+     */
+    public boolean isLastReplyError() {
+        return isLastReplyError;
     }
 
     /**
@@ -139,6 +155,7 @@ public class Erina {
      * @return the reply, whose lines are separated by newlines
      */
     public String getResponse(String input) {
+        isLastReplyError = false;
         if (input.isBlank()) {
             return "";
         }
@@ -160,6 +177,7 @@ public class Erina {
             storage.save(tasks.asList());
             return response;
         } catch (ErinaException e) {
+            isLastReplyError = true;
             return e.getMessage();
         }
     }
