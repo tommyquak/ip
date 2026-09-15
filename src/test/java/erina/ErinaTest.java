@@ -78,6 +78,80 @@ public class ErinaTest {
     }
 
     @Test
+    public void getResponse_blankInput_returnsEmptyReply() {
+        assertEquals("", newErina().getResponse("   "));
+    }
+
+    @Test
+    public void getResponse_tasksAdded_areStillThereAfterRestart() {
+        Erina first = newErina();
+        first.getResponse("todo read book");
+        first.getResponse("deadline return book /by 2026-09-18");
+
+        // A new Erina on the same file stands in for reopening the app.
+        String list = newErina().getResponse("list");
+
+        assertTrue(list.contains("1.[T][ ] read book"), list);
+        assertTrue(list.contains("2.[D][ ] return book (by: Sep 18 2026)"), list);
+    }
+
+    @Test
+    public void getResponse_deleteTask_removesOnlyThatTask() {
+        Erina erina = newErina();
+        erina.getResponse("todo read book");
+        erina.getResponse("todo buy milk");
+
+        erina.getResponse("delete 1");
+        String list = erina.getResponse("list");
+
+        assertFalse(list.contains("read book"), list);
+        assertTrue(list.contains("1.[T][ ] buy milk"), list);
+    }
+
+    @Test
+    public void getResponse_unmarkDoneTask_reopensIt() {
+        Erina erina = newErina();
+        erina.getResponse("todo read book");
+        erina.getResponse("mark 1");
+
+        String reply = erina.getResponse("unmark 1");
+
+        assertTrue(reply.contains("[T][ ] read book"), reply);
+    }
+
+    @Test
+    public void getResponse_findKeyword_showsOnlyMatchingTasks() {
+        Erina erina = newErina();
+        erina.getResponse("todo read book");
+        erina.getResponse("todo buy milk");
+
+        String reply = erina.getResponse("find BOOK");
+
+        assertTrue(reply.contains("read book"), reply);
+        assertFalse(reply.contains("buy milk"), reply);
+    }
+
+    @Test
+    public void getResponse_bye_asksToExit() {
+        Erina erina = newErina();
+        assertFalse(erina.isExit());
+
+        erina.getResponse("bye");
+
+        assertTrue(erina.isExit());
+    }
+
+    @Test
+    public void getResponse_byeWithExtraText_doesNotExit() {
+        Erina erina = newErina();
+
+        erina.getResponse("bye now");
+
+        assertFalse(erina.isExit());
+        assertTrue(erina.isLastReplyError());
+    }
+
+    @Test
     public void isLastReplyError_badThenGoodCommand_flagsOnlyTheBadReply() {
         Erina erina = newErina();
 
