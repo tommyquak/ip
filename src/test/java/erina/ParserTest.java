@@ -153,4 +153,28 @@ public class ParserTest {
     public void parseIndex_emptyArgument_throws() {
         assertThrows(ErinaException.class, () -> Parser.parseIndex("", 3));
     }
+
+    @Test
+    public void parseDeadline_markerInsideWord_isNotCountedAsMarker() throws ErinaException {
+        // "/bypass" is part of the description, not a second /by marker.
+        Deadline deadline = Parser.parseDeadline("fix /bypass valve /by 2026-09-18");
+        assertEquals("fix /bypass valve", deadline.getDescription());
+    }
+
+    @Test
+    public void parseEvent_fromGivenTwice_throws() {
+        assertThrows(ErinaException.class, () -> Parser.parseEvent("trip /from Mon /from Tue /to Wed"));
+    }
+
+    @Test
+    public void parseIndex_noTasksYet_throws() {
+        ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseIndex("1", 0));
+        assertEquals("Pardon me. There are no tasks yet, so there is no task 1.", e.getMessage());
+    }
+
+    @Test
+    public void parseIndex_zero_throws() {
+        // Task numbers count from 1, so 0 is out of range even with tasks present.
+        assertThrows(ErinaException.class, () -> Parser.parseIndex("0", 3));
+    }
 }

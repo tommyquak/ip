@@ -1,12 +1,16 @@
 package erina;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import erina.task.Deadline;
 import erina.task.Task;
 import erina.task.Todo;
 
@@ -19,6 +23,16 @@ public class TaskListTest {
         TaskList tasks = new TaskList();
         assertTrue(tasks.isEmpty());
         assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public void constructor_existingTasks_keepsThemInOrder() {
+        List<Task> saved = new ArrayList<>(List.of(new Todo("first"), new Todo("second")));
+
+        TaskList tasks = new TaskList(saved);
+
+        assertEquals(2, tasks.size());
+        assertEquals("second", tasks.get(1).getDescription());
     }
 
     @Test
@@ -68,5 +82,22 @@ public class TaskListTest {
         assertEquals(2, tasks.size());
         // The task after the removed one moves up to fill the gap.
         assertEquals("third", tasks.get(1).getDescription());
+    }
+
+    @Test
+    public void contains_taskWithSameDetails_isTrue() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("return book", LocalDate.of(2026, 9, 18)));
+
+        assertTrue(tasks.contains(new Deadline("Return book", LocalDate.of(2026, 9, 18))));
+    }
+
+    @Test
+    public void contains_taskWithDifferentDetails_isFalse() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("return book", LocalDate.of(2026, 9, 18)));
+
+        assertFalse(tasks.contains(new Todo("return book")));
+        assertFalse(tasks.contains(new Deadline("return book", LocalDate.of(2026, 9, 19))));
     }
 }

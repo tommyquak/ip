@@ -3,15 +3,23 @@ package erina.task;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A task that must be finished by a stated date, shown as
  * {@code [D][ ] return book (by: Oct 15 2019)}.
  */
 public class Deadline extends Task {
-    /** How the due date is shown to the user, for example {@code Oct 15 2019}. */
+    /**
+     * How the due date is shown to the user, for example {@code Oct 15 2019}.
+     *
+     * <p>The locale is fixed to English because month abbreviations otherwise
+     * follow the computer's settings: English (Singapore), for one, shortens
+     * September to {@code Sept}, so the same task would look different on
+     * different machines.
+     */
     private static final DateTimeFormatter DISPLAY_FORMAT =
-            DateTimeFormatter.ofPattern("MMM d yyyy");
+            DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
 
     /**
      * When the task is due.
