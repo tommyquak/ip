@@ -109,6 +109,25 @@ public abstract class Task {
     }
 
     /**
+     * Returns whether the other task has the same details as this one: the
+     * same kind, the same description ignoring case, and the same extra
+     * fields such as dates.
+     *
+     * <p>Whether either task is done is ignored, since that is progress on a
+     * task rather than part of what the task is. {@code equals} is
+     * deliberately not overridden: two entries with the same details are
+     * still two separate entries in a list.
+     *
+     * @param other the task to compare with
+     * @return {@code true} if both describe the same task
+     */
+    public boolean isSameTask(Task other) {
+        return getTypeCode().equals(other.getTypeCode())
+                && description.equalsIgnoreCase(other.description)
+                && getExtraSaveFields().equals(other.getExtraSaveFields());
+    }
+
+    /**
      * Returns the symbol shown inside the status box.
      *
      * @return {@code "X"} if this task is done, a single space otherwise

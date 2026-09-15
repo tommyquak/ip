@@ -3,6 +3,7 @@ package erina;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -59,6 +60,8 @@ public class Storage {
         try {
             lines = Files.readAllLines(filePath);
         } catch (IOException e) {
+            // Covers a file that is locked, not readable by this user, or
+            // actually a folder: all mean the list cannot be loaded.
             throw new ErinaException("OOPS!!! I could not read the save file "
                     + filePath + ".");
         }
@@ -70,8 +73,7 @@ public class Storage {
             }
             try {
                 tasks.add(parseTask(line));
-            } catch (ErinaException | ArrayIndexOutOfBoundsException
-                    | DateTimeParseException e) {
+            } catch (ErinaException | DateTimeParseException e) {
                 // Report the line number as people count them, from 1.
                 throw new ErinaException("OOPS!!! Line " + (i + 1)
                         + " of the save file " + filePath + " is not a task I understand:"
@@ -100,12 +102,37 @@ public class Storage {
 
         try {
             // The folder does not exist until the first save on a new machine.
-            Files.createDirectories(filePath.getParent());
+            // A bare file name has no parent folder to create.
+            Path folder = filePath.getParent();
+            if (folder != null) {
+                Files.createDirectories(folder);
+            }
             Files.write(filePath, lines);
         } catch (IOException e) {
             throw new ErinaException("OOPS!!! I could not write the save file "
-                    + filePath + ".");
+                    + filePath + ". Your latest change will be lost when I close.");
         }
+    }
+
+    /**
+     * Copies the save file to a backup next to it, named with a {@code .bak}
+     * ending.
+     *
+     * <p>Used when the file cannot be understood: the next change would
+     * otherwise overwrite it, destroying tasks the user might still recover
+     * by fixing the file by hand.
+     *
+     * @return where the backup was written
+     * @throws ErinaException if the copy could not be made
+     */
+    public Path backUp() throws ErinaException {
+        Path backup = filePath.resolveSibling(filePath.getFileName() + ".bak");
+        try {
+            Files.copy(filePath, backup, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new ErinaException("I could not make a backup of it either.");
+        }
+        return backup;
     }
 
     /**
@@ -117,18 +144,22 @@ public class Storage {
      */
     private Task parseTask(String line) throws ErinaException {
         // The separator contains |, which is a special character in regular
-        // expressions, so split on its literal quoted form.
-        String[] fields = line.split(Pattern.quote(Task.SAVE_SEPARATOR));
+        // expressions, so split on its literal quoted form. The limit of -1
+        // keeps empty trailing fields, so a missing value is noticed.
+        String[] fields = line.split(Pattern.quote(Task.SAVE_SEPARATOR), -1);
 
         Task task;
         switch (fields[0]) {
             case "T":
+                checkFields(fields, 3);
                 task = new Todo(fields[2]);
                 break;
             case "D":
+                checkFields(fields, 4);
                 task = new Deadline(fields[2], LocalDate.parse(fields[3]));
                 break;
             case "E":
+                checkFields(fields, 5);
                 task = new Event(fields[2], fields[3], fields[4]);
                 break;
             default:
@@ -144,5 +175,27 @@ public class Storage {
             throw new ErinaException("Unknown done flag: " + fields[1]);
         }
         return task;
+    }
+
+    /**
+     * Checks that a saved line has exactly the fields its kind of task needs,
+     * none of them blank.
+     *
+     * <p>Too few fields would crash when read; too many, or blank ones, mean
+     * the line was edited by hand and would load as the wrong task.
+     *
+     * @param fields   the fields of one saved line
+     * @param expected how many fields this kind of task has
+     * @throws ErinaException if the count is wrong or a field is blank
+     */
+    private static void checkFields(String[] fields, int expected) throws ErinaException {
+        if (fields.length != expected) {
+            throw new ErinaException("Expected " + expected + " fields but found " + fields.length);
+        }
+        for (String field : fields) {
+            if (field.isBlank()) {
+                throw new ErinaException("A field is empty");
+            }
+        }
     }
 }
