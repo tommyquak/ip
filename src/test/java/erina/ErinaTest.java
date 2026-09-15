@@ -78,6 +78,17 @@ public class ErinaTest {
     }
 
     @Test
+    public void isLastReplyError_badThenGoodCommand_flagsOnlyTheBadReply() {
+        Erina erina = newErina();
+
+        erina.getResponse("mark 1");
+        assertTrue(erina.isLastReplyError());
+
+        erina.getResponse("todo read book");
+        assertFalse(erina.isLastReplyError());
+    }
+
+    @Test
     public void constructor_unreadableSaveFile_startsEmptyAndKeepsBackup() throws IOException {
         Files.writeString(saveFile(), "this is not a task\n");
 
