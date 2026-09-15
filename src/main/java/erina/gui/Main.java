@@ -6,6 +6,7 @@ import erina.Erina;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -23,7 +24,10 @@ public class Main extends Application {
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
             stage.setScene(scene);
-            stage.setTitle("Erina");
+            stage.setTitle("Erina - your meticulous task keeper");
+            // Erina's portrait doubles as the window icon, so her window is
+            // recognisable in the taskbar or dock.
+            stage.getIcons().add(new Image(Main.class.getResourceAsStream("/images/erina.png")));
             stage.setMinHeight(220.0);
             stage.setMinWidth(417.0);
             fxmlLoader.<MainWindow>getController().setErina(erina);

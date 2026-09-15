@@ -62,7 +62,7 @@ public class Storage {
         } catch (IOException e) {
             // Covers a file that is locked, not readable by this user, or
             // actually a folder: all mean the list cannot be loaded.
-            throw new ErinaException("OOPS!!! I could not read the save file "
+            throw new ErinaException("Pardon me. I could not read the save file "
                     + filePath + ".");
         }
 
@@ -75,7 +75,7 @@ public class Storage {
                 tasks.add(parseTask(line));
             } catch (ErinaException | DateTimeParseException e) {
                 // Report the line number as people count them, from 1.
-                throw new ErinaException("OOPS!!! Line " + (i + 1)
+                throw new ErinaException("Pardon me. Line " + (i + 1)
                         + " of the save file " + filePath + " is not a task I understand:"
                         + " \"" + line + "\"");
             }
@@ -109,7 +109,7 @@ public class Storage {
             }
             Files.write(filePath, lines);
         } catch (IOException e) {
-            throw new ErinaException("OOPS!!! I could not write the save file "
+            throw new ErinaException("Pardon me. I could not write the save file "
                     + filePath + ". Your latest change will be lost when I close.");
         }
     }

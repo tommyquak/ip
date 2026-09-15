@@ -50,7 +50,7 @@ public enum Command {
 
     /** Shown when the user types something that is not a command. */
     private static final String UNKNOWN_COMMAND_MESSAGE =
-            "OOPS!!! I'm sorry, but I don't know what that means :-(\n"
+            "Pardon me, but I don't know what that means.\n"
             + "Type help to see what I can do.";
 
     /** The word the user types to invoke this command. */

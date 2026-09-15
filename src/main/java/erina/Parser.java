@@ -19,7 +19,7 @@ import erina.task.Todo;
  */
 public class Parser {
     /** Shown whenever an event command is missing one of its three parts. */
-    private static final String EVENT_FORMAT_MESSAGE = "OOPS!!! An event needs a description, "
+    private static final String EVENT_FORMAT_MESSAGE = "Pardon me. An event needs a description, "
             + "a /from time and a /to time, like: event project meeting /from Mon 2pm /to 4pm";
 
     /**
@@ -67,7 +67,7 @@ public class Parser {
      */
     public static void checkNoArgument(Command command, String argument) throws ErinaException {
         if (!argument.isEmpty()) {
-            throw new ErinaException("OOPS!!! " + command.getKeyword()
+            throw new ErinaException("Pardon me. " + command.getKeyword()
                     + " does not take anything after it. Just type: " + command.getKeyword());
         }
     }
@@ -83,7 +83,7 @@ public class Parser {
     public static Todo parseTodo(String argument) throws ErinaException {
         if (argument.isEmpty()) {
             throw new ErinaException(
-                    "OOPS!!! The description of a todo cannot be empty.");
+                    "Pardon me. The description of a todo cannot be empty.");
         }
         checkNoReservedCharacter(argument);
         return new Todo(argument);
@@ -101,7 +101,7 @@ public class Parser {
     public static Deadline parseDeadline(String argument) throws ErinaException {
         if (argument.isEmpty()) {
             throw new ErinaException(
-                    "OOPS!!! The description of a deadline cannot be empty.");
+                    "Pardon me. The description of a deadline cannot be empty.");
         }
         checkNoReservedCharacter(argument);
         checkAtMostOnce(argument, "/by");
@@ -109,7 +109,7 @@ public class Parser {
         // Limit of 2 so that a description containing "/by" is left intact.
         String[] parts = argument.split(" /by ", 2);
         if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
-            throw new ErinaException("OOPS!!! A deadline needs a description and a "
+            throw new ErinaException("Pardon me. A deadline needs a description and a "
                     + "/by date, like: deadline return book /by 2019-10-15");
         }
         return new Deadline(parts[0].trim(), parseDate(parts[1].trim()));
@@ -128,7 +128,7 @@ public class Parser {
     public static Event parseEvent(String argument) throws ErinaException {
         if (argument.isEmpty()) {
             throw new ErinaException(
-                    "OOPS!!! The description of an event cannot be empty.");
+                    "Pardon me. The description of an event cannot be empty.");
         }
         checkNoReservedCharacter(argument);
         checkAtMostOnce(argument, "/from");
@@ -164,7 +164,7 @@ public class Parser {
      */
     public static int parseIndex(String argument, int taskCount) throws ErinaException {
         if (argument.isEmpty()) {
-            throw new ErinaException("OOPS!!! Please tell me which task number, "
+            throw new ErinaException("Pardon me. Please tell me which task number, "
                     + "like: mark 2");
         }
 
@@ -174,17 +174,17 @@ public class Parser {
         } catch (NumberFormatException e) {
             // Rethrown as an ErinaException so the main loop deals with one
             // kind of failure, phrased for the user rather than the compiler.
-            throw new ErinaException("OOPS!!! \"" + argument
+            throw new ErinaException("Pardon me. \"" + argument
                     + "\" is not a task number.");
         }
 
         if (taskCount == 0) {
-            throw new ErinaException("OOPS!!! There are no tasks yet, so there is "
+            throw new ErinaException("Pardon me. There are no tasks yet, so there is "
                     + "no task " + number + ".");
         }
         if (number < 1 || number > taskCount) {
-            throw new ErinaException("OOPS!!! There is no task " + number
-                    + ". You have " + taskCount + " tasks.");
+            throw new ErinaException("Pardon me. There is no task " + number
+                    + ". Your list only goes up to " + taskCount + ".");
         }
 
         // The user counts from 1 but the list is indexed from 0.
@@ -207,7 +207,7 @@ public class Parser {
         try {
             return LocalDate.parse(text);
         } catch (DateTimeParseException e) {
-            throw new ErinaException("OOPS!!! \"" + text + "\" is not a date I "
+            throw new ErinaException("Pardon me. \"" + text + "\" is not a date I "
                     + "understand. Please use yyyy-mm-dd, like 2019-10-15.");
         }
     }
@@ -220,7 +220,7 @@ public class Parser {
      */
     private static void checkNoReservedCharacter(String text) throws ErinaException {
         if (text.contains(RESERVED_CHARACTER)) {
-            throw new ErinaException("OOPS!!! Tasks cannot contain the character "
+            throw new ErinaException("Pardon me. Tasks cannot contain the character "
                     + RESERVED_CHARACTER + ", because I use it to organise the save file.");
         }
     }
@@ -242,7 +242,7 @@ public class Parser {
                 .filter(marker::equals)
                 .count();
         if (count > 1) {
-            throw new ErinaException("OOPS!!! Please give " + marker + " only once.");
+            throw new ErinaException("Pardon me. Please give " + marker + " only once.");
         }
     }
 
@@ -262,7 +262,7 @@ public class Parser {
         Optional<LocalDate> start = tryParseDate(from);
         Optional<LocalDate> end = tryParseDate(to);
         if (start.isPresent() && end.isPresent() && end.get().isBefore(start.get())) {
-            throw new ErinaException("OOPS!!! An event cannot end (" + to
+            throw new ErinaException("Pardon me. An event cannot end (" + to
                     + ") before it starts (" + from + ").");
         }
     }
