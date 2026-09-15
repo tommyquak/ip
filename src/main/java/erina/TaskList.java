@@ -82,6 +82,18 @@ public class TaskList {
     }
 
     /**
+     * Returns whether the list already holds a task with the same details as
+     * the given one.
+     *
+     * @param task the task to look for
+     * @return {@code true} if some task in the list is the same task
+     * @see Task#isSameTask(Task)
+     */
+    public boolean contains(Task task) {
+        return tasks.stream().anyMatch(existing -> existing.isSameTask(task));
+    }
+
+    /**
      * Returns the tasks whose descriptions contain the given keyword.
      *
      * <p>Matching ignores case, so {@code find book} also finds

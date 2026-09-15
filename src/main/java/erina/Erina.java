@@ -61,12 +61,13 @@ public class Erina {
         this.ui = new Ui();
 
         // A save file that cannot be understood should not end the program:
-        // remember the complaint, and carry on with an empty list. The
-        // unreadable file is only replaced once the user changes something.
+        // remember the complaint, and carry on with an empty list. The file is
+        // copied aside first, because the user's next change overwrites it.
         try {
             this.tasks = new TaskList(storage.load());
         } catch (ErinaException e) {
-            this.loadError = e.getMessage() + "\nI'll start with an empty list instead.";
+            this.loadError = respond(e.getMessage(), backUpUnreadableFile(),
+                    "I'll start with an empty list instead.");
             this.tasks = new TaskList();
         }
     }
@@ -146,6 +147,7 @@ public class Erina {
             ParsedCommand parsed = Parser.parse(input);
             assert parsed.command() != null : "Parser.parse returns a command or throws";
             if (parsed.command() == Command.BYE) {
+                Parser.checkNoArgument(Command.BYE, parsed.argument());
                 isExit = true;
                 return Ui.FAREWELL;
             }
@@ -177,6 +179,19 @@ public class Erina {
     }
 
     /**
+     * Keeps a copy of a save file that could not be loaded, and says where.
+     *
+     * @return the sentence telling the user what happened to their file
+     */
+    private String backUpUnreadableFile() {
+        try {
+            return "I kept a copy of it at " + storage.backUp() + ", in case you want to fix it.";
+        } catch (ErinaException e) {
+            return e.getMessage();
+        }
+    }
+
+    /**
      * Carries out one command from the user.
      *
      * @param command  the command the user asked for
@@ -191,6 +206,7 @@ public class Erina {
 
         switch (command) {
             case LIST:
+                Parser.checkNoArgument(command, argument);
                 return listTasks();
             case MARK:
                 return setDone(argument, true);
@@ -207,6 +223,7 @@ public class Erina {
             case FIND:
                 return findTasks(argument);
             case HELP:
+                Parser.checkNoArgument(command, argument);
                 return showHelp();
             default:
                 // BYE is handled by getResponse, which has to stop the loop, and
@@ -236,8 +253,17 @@ public class Erina {
      *
      * @param task the task to add
      * @return the confirmation to show
+     * @throws ErinaException if the list already holds the same task
      */
-    private String addTask(Task task) {
+    private String addTask(Task task) throws ErinaException {
+        // A second copy of a task is almost always a mistyped repeat, and
+        // would leave the user unsure which one to mark or delete.
+        if (tasks.contains(task)) {
+            throw new ErinaException(respond(
+                    "OOPS!!! That task is already in your list:",
+                    "  " + task));
+        }
+
         int sizeBefore = tasks.size();
         tasks.add(task);
         assert tasks.size() == sizeBefore + 1 : "adding a task must grow the list by one";
@@ -268,6 +294,9 @@ public class Erina {
     /**
      * Marks the task at the given position as done or not done.
      *
+     * <p>If the task is already in the requested state, nothing changes and
+     * the user is told so, rather than being shown a misleading confirmation.
+     *
      * @param argument the task number as typed by the user, counting from 1
      * @param isDone   {@code true} to mark done, {@code false} to mark not done
      * @return the confirmation to show
@@ -276,6 +305,11 @@ public class Erina {
      */
     private String setDone(String argument, boolean isDone) throws ErinaException {
         Task task = tasks.get(Parser.parseIndex(argument, tasks.size()));
+
+        if (task.isDone() == isDone) {
+            String state = isDone ? "already marked as done:" : "already not done:";
+            return respond("That task is " + state, "  " + task);
+        }
 
         if (isDone) {
             task.markAsDone();

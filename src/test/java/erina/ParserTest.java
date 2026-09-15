@@ -1,5 +1,6 @@
 package erina;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
 import erina.task.Deadline;
+import erina.task.Event;
 import erina.task.Todo;
 
 /**
@@ -32,8 +34,25 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_extraSpacesAndCapitals_stillRecognised() throws ErinaException {
+        ParsedCommand parsed = Parser.parse("  MARK    2 ");
+        assertEquals(Command.MARK, parsed.command());
+        assertEquals("2", parsed.argument());
+    }
+
+    @Test
     public void parse_unknownCommandWord_throws() {
         assertThrows(ErinaException.class, () -> Parser.parse("blah"));
+    }
+
+    @Test
+    public void checkNoArgument_extraText_throws() {
+        assertThrows(ErinaException.class, () -> Parser.checkNoArgument(Command.LIST, "all"));
+    }
+
+    @Test
+    public void checkNoArgument_nothingAfterCommand_passes() {
+        assertDoesNotThrow(() -> Parser.checkNoArgument(Command.LIST, ""));
     }
 
     @Test
@@ -46,6 +65,12 @@ public class ParserTest {
     public void parseTodo_emptyDescription_throws() {
         ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseTodo(""));
         assertEquals("OOPS!!! The description of a todo cannot be empty.", e.getMessage());
+    }
+
+    @Test
+    public void parseTodo_saveSeparatorCharacter_throws() {
+        // "|" would split the task into extra fields when the file is loaded.
+        assertThrows(ErinaException.class, () -> Parser.parseTodo("read | write"));
     }
 
     @Test
@@ -62,6 +87,39 @@ public class ParserTest {
     @Test
     public void parseDeadline_textInsteadOfDate_throws() {
         assertThrows(ErinaException.class, () -> Parser.parseDeadline("return book /by Sunday"));
+    }
+
+    @Test
+    public void parseDeadline_byGivenTwice_throws() {
+        String input = "return book /by 2019-10-15 /by 2019-10-16";
+        ErinaException e = assertThrows(ErinaException.class, () -> Parser.parseDeadline(input));
+        assertEquals("OOPS!!! Please give /by only once.", e.getMessage());
+    }
+
+    @Test
+    public void parseDeadline_nonExistentDate_throws() {
+        assertThrows(ErinaException.class, () -> Parser.parseDeadline("pay rent /by 2023-02-30"));
+    }
+
+    @Test
+    public void parseEvent_freeTextTimes_returnsEvent() throws ErinaException {
+        Event event = Parser.parseEvent("project meeting /from Mon 2pm /to 4pm");
+        assertEquals("[E][ ] project meeting (from: Mon 2pm to: 4pm)", event.toString());
+    }
+
+    @Test
+    public void parseEvent_endDateBeforeStartDate_throws() {
+        assertThrows(ErinaException.class, () -> Parser.parseEvent("camp /from 2019-10-16 /to 2019-10-15"));
+    }
+
+    @Test
+    public void parseEvent_sameStartAndEndDate_returnsEvent() {
+        assertDoesNotThrow(() -> Parser.parseEvent("career fair /from 2019-10-15 /to 2019-10-15"));
+    }
+
+    @Test
+    public void parseEvent_missingToPart_throws() {
+        assertThrows(ErinaException.class, () -> Parser.parseEvent("project meeting /from Mon 2pm"));
     }
 
     @Test
